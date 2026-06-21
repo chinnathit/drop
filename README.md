@@ -39,9 +39,10 @@ No installation. No account. Just open and share.
 
 Drop lets you share files and messages between devices on the same local network — no cables, no cloud uploads, no accounts needed.
 
-1. Open **[drop.sourse.xyz](https://drop.sourse.xyz)** on two or more devices on the same Wi-Fi
-2. Devices discover each other automatically
-3. Tap a device to send files or text instantly
+1. Open **[drop.sourse.xyz](https://drop.sourse.xyz)** on two or more devices
+2. Devices on the same network discover each other automatically
+3. Or pair devices / join a public room to share across different networks
+4. Tap a device to send files or text instantly
 
 ---
 
