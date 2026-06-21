@@ -47,11 +47,18 @@ Drop lets you share files and messages between devices on the same local network
 ---
 
 ## 🛠️ Built With
-
-- [Node.js](https://nodejs.org/)
-- [Express](https://expressjs.com/)
-- [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
-- [WebRTC](https://webrtc.org/)
+ 
+- Vanilla HTML5 / JS ES6 / CSS3 frontend
+- [WebRTC](http://webrtc.org/) / WebSockets
+- [Node.js](https://nodejs.org/en/) backend
+- [Progressive Web App (PWA)](https://en.wikipedia.org/wiki/Progressive_web_app) unified functionality
+- [IndexedDB API](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) storage handling
+- [zip.js](https://gildas-lormeau.github.io/zip.js/) library
+- [cyrb53](https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js) super-fast hash function
+- [NoSleep](https://github.com/richtr/NoSleep.js) display sleep / wake lock ([MIT](./licenses/MIT-NoSleep))
+- [heic2any](https://github.com/alexcorvi/heic2any) HEIC/HEIF to PNG/GIF/JPEG ([MIT](./licenses/MIT-heic2any))
+- [Weblate](https://weblate.org/) web-based localization tool
+- [BrowserStack](https://www.browserstack.com/) cross-browser testing
 
 ---
 
