@@ -17,7 +17,7 @@
     },
     "instructions": {
         "no-peers_data-drop-bg": "Slepp for å velje mottakar",
-        \"no-peers-title\": \"Opne Drop på andre einingar for å sende filer\",
+        "no-peers-title": "Opne Drop på andre einingar for å sende filer",
         "no-peers-subtitle": "Par einingar eller gå inn i eit offentleg rom for å bli søkbar på andre nettverk",
         "x-instructions-share-mode_desktop": "Klikk for å sende {{descriptor}}",
         "activate-share-mode-shared-file": "delt fil",
@@ -26,7 +26,7 @@
         "x-instructions_data-drop-peer": "Slepp for å sende til part",
         "x-instructions_data-drop-bg": "Slepp for å sende til mottakar",
         "x-instructions-share-mode_mobile": "Trykk for å sende {{descriptor}}",
-        \"activate-share-mode-base\": \"Opne Drop på andre einingar for å sende\",
+        "activate-share-mode-base": "Opne Drop på andre einingar for å sende",
         "activate-share-mode-shared-text": "delt tekst",
         "activate-share-mode-and-other-file": "og 1 anna fil",
         "activate-share-mode-and-other-files-plural": "og {{count}} andre filer",
