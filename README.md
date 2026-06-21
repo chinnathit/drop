@@ -18,16 +18,16 @@
 
 ---
 
-## ✨ What's Different from PairDrop
+## What's Different from PairDrop
 
 Drop is a customized fork of [PairDrop](https://github.com/schlagmichdoch/PairDrop) with a focus on a cleaner, more modern experience:
 
-- 🖤 **Black & White Theme** — Full dark monochrome UI, minimal and distraction-free
-- 🞿 **Bottom Dock Navigation** — All icons moved from the right-side panel into a floating bottom dock, making it easier to reach on any device
+- **Black & White Theme** — Full dark monochrome UI, minimal and distraction-free
+- **Bottom Dock Navigation** — All icons moved from the right-side panel into a floating bottom dock, making it easier to reach on any device
 
 ---
 
-## 🚀 Try it
+## Try it
 
 **[drop.sourse.xyz](https://drop.sourse.xyz)**
 
@@ -35,7 +35,7 @@ No installation. No account. Just open and share.
 
 ---
 
-## 📖 How it works
+## How it works
 
 Drop lets you share files and messages between devices on the same local network — no cables, no cloud uploads, no accounts needed.
 
@@ -46,7 +46,7 @@ Drop lets you share files and messages between devices on the same local network
 
 ---
 
-## 🛠️ Built With
+## Built With
  
 - Vanilla HTML5 / JS ES6 / CSS3 frontend
 - [WebRTC](http://webrtc.org/) / WebSockets
@@ -62,6 +62,6 @@ Drop lets you share files and messages between devices on the same local network
 
 ---
 
-## 📄 Credits
+## Credits
 
 Based on [PairDrop](https://github.com/schlagmichdoch/PairDrop) — open-source, licensed under [GPL-3.0](./LICENSE).
