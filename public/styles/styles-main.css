@@ -1122,7 +1122,7 @@ See note here: https://developer.mozilla.org/en-US/docs/Web/CSS/user-select */
 */
 
 /* ── 1. Google Font ───────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+/* Font loaded via <link> in HTML head for correct @import placement */
 
 body {
     font-family: 'Inter', 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
