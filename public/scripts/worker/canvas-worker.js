@@ -54,7 +54,7 @@ function initCanvas(footerOffsetHeight, clientWidth, clientHeight) {
     let oldOffset = offset;
     w = clientWidth;
     h = clientHeight;
-    offset = footerOffsetHeight - 28;
+    offset = footerOffsetHeight + 55;
 
     if (oldW === w && oldH === h && oldOffset === offset) return; // nothing has changed
 

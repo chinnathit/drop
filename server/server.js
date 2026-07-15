@@ -8,20 +8,27 @@ export default class PairDropServer {
 
     constructor(conf) {
         const app = express();
+        app.use((req, res, next) => {
+            res.setHeader('X-Frame-Options', 'DENY');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.setHeader('X-XSS-Protection', '1; mode=block');
+            res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+            res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+            res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+            res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss:;");
+            next();
+        });
 
         if (conf.rateLimit) {
             const limiter = RateLimit({
-                windowMs: 5 * 60 * 1000, // 5 minutes
-                max: 1000, // Limit each IP to 1000 requests per `window` (here, per 5 minutes)
+                windowMs: 5 * 60 * 1000,
+                max: 1000,
                 message: 'Too many requests from this IP Address, please try again after 5 minutes.',
-                standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-                legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+                standardHeaders: true,
+                legacyHeaders: false,
             })
 
             app.use(limiter);
-            // ensure correct client ip and not the ip of the reverse proxy is used for rate limiting
-            // see https://express-rate-limit.mintlify.app/guides/troubleshooting-proxy-issues
-
             app.set('trust proxy', conf.rateLimit);
 
             if (!conf.debugMode) {
@@ -45,8 +52,6 @@ export default class PairDropServer {
             })
         }
 
-        // By default, clients connecting to your instance use the signaling server of your instance to connect to other devices.
-        // By using `WS_SERVER`, you can host an instance that uses another signaling server.
         app.get('/config', (req, res) => {
             res.send({
                 signalingServer: conf.signalingServer,
