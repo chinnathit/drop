@@ -150,19 +150,19 @@ header:not(.overflow-expanded) {
     height: 56px;
 }
 
-header > * {
+header>* {
     margin-left: 4px;
     margin-right: 4px;
 }
 
-header > * {
+header>* {
     display: flex;
     flex-direction: column;
     align-self: flex-start;
     touch-action: manipulation;
 }
 
-header > .icon-button {
+header>.icon-button {
     height: 40px;
 }
 
@@ -170,7 +170,7 @@ header * {
     transition: all 300ms;
 }
 
-#theme-wrapper > div {
+#theme-wrapper>div {
     display: flex;
     flex-direction: column;
 }
@@ -221,20 +221,20 @@ header * {
         pointer-events: none;
     }
 
-    #theme-wrapper > div {
+    #theme-wrapper>div {
         flex-direction: column-reverse;
     }
 }
 
-#expand > .icon {
+#expand>.icon {
     transition: transform 150ms ease-out
 }
 
-html:not([dir="rtl"]) #expand.flipped  > .icon {
+html:not([dir="rtl"]) #expand.flipped>.icon {
     transform: rotate(-90deg);
 }
 
-html[dir="rtl"] #expand.flipped  > .icon {
+html[dir="rtl"] #expand.flipped>.icon {
     transform: rotate(90deg);
 }
 
@@ -273,7 +273,8 @@ h2 {
     font-weight: 400;
     letter-spacing: -.012em;
     line-height: 32px;
-    color: var(--primary-color);}
+    color: var(--primary-color);
+}
 
 h3 {
     font-size: 20px;
@@ -358,12 +359,11 @@ x-noscript {
 .overflowing {
     background:
         /* Shadow covers */
-            linear-gradient(rgb(var(--shadow-color-cover-rgb)) 30%, rgba(var(--shadow-color-cover-rgb), 0)),
-            linear-gradient(rgba(var(--shadow-color-cover-rgb), 0), rgb(var(--shadow-color-cover-rgb)) 70%) 0 100%,
-                /* Shadows */
-            radial-gradient(farthest-side at 50% 0, rgba(var(--shadow-color-rgb), .2), rgba(var(--shadow-color-rgb), 0)),
-            radial-gradient(farthest-side at 50% 100%, rgba(var(--shadow-color-rgb), .2), rgba(var(--shadow-color-rgb), 0))
-            0 100%;
+        linear-gradient(rgb(var(--shadow-color-cover-rgb)) 30%, rgba(var(--shadow-color-cover-rgb), 0)),
+        linear-gradient(rgba(var(--shadow-color-cover-rgb), 0), rgb(var(--shadow-color-cover-rgb)) 70%) 0 100%,
+        /* Shadows */
+        radial-gradient(farthest-side at 50% 0, rgba(var(--shadow-color-rgb), .2), rgba(var(--shadow-color-rgb), 0)),
+        radial-gradient(farthest-side at 50% 100%, rgba(var(--shadow-color-rgb), .2), rgba(var(--shadow-color-rgb), 0)) 0 100%;
     background-repeat: no-repeat;
     background-size: 100% 60px, 100% 60px, 100% 24px, 100% 24px;
     background-attachment: local, local, scroll, scroll;
@@ -406,7 +406,8 @@ x-peers {
     overscroll-behavior-x: none;
     scrollbar-width: none;
 
-    --peers-per-row: 6; /* default if browser does not support :has selector */
+    --peers-per-row: 6;
+    /* default if browser does not support :has selector */
     --x-peers-width: min(100vw, calc(var(--peers-per-row) * (var(--peer-width) + 25px) - 16px));
     width: var(--x-peers-width);
 }
@@ -423,7 +424,7 @@ x-no-peers {
 
 x-no-peers h2,
 x-no-peers a {
-    color: var(--primary-color);
+    color: var(--primary-color2);
     margin-bottom: 5px;
 }
 
@@ -485,7 +486,7 @@ footer .logo {
     border-radius: 12px;
 }
 
-.panel > div:first-of-type {
+.panel>div:first-of-type {
     padding-left: 4px;
     padding-right: 4px;
 }
@@ -522,7 +523,8 @@ footer .logo {
 }
 
 .known-as-wrapper {
-    font-size: 16px; /* prevents auto-zoom on edit */
+    font-size: 16px;
+    /* prevents auto-zoom on edit */
 }
 
 #display-name {
@@ -711,14 +713,14 @@ button::-moz-focus-inner {
     transition-delay: 100ms;
 }
 
-#about > * {
+#about>* {
     transition: opacity 300ms ease 300ms;
     will-change: opacity;
     pointer-events: all;
 }
 
-#about:not(:target) > header,
-#about:not(:target) > section {
+#about:not(:target)>header,
+#about:not(:target)>section {
     opacity: 0;
     pointer-events: none;
     transition-delay: 0s;
@@ -733,7 +735,7 @@ button::-moz-focus-inner {
     align-items: baseline;
 }
 
-#about .title-wrapper > div {
+#about .title-wrapper>div {
     margin-left: 0.4em;
 }
 
@@ -835,7 +837,7 @@ x-toast span {
     margin: auto 4px auto 10px
 }
 
-x-dialog[show] ~ div x-toast {
+x-dialog[show]~div x-toast {
     background-color: var(--lt-dialog-bg-color);
     color: rgb(var(--lt-text-color));
 }
@@ -923,17 +925,14 @@ x-peers:empty~x-instructions {
     color-scheme: light dark;
 }
 
-/*
-    Color Themes
-*/
-
+/*    Color Themes*/
 /* Default colors */
 body {
-    /* Constant colors */
-    --primary-color: #4285f4;
-    --paired-device-color: #00a69c;
-    --public-room-color: #ed9d01;
-    --accent-color: var(--primary-color);
+    --primary-color: #101010;
+    --primary-color2: #333333;
+    --paired-device-color: #101010;
+    --public-room-color: #101010;
+    --accent-color: var(--primary-color2);
     --ws-peer-color: #ff6b6b;
     --btn-disabled-color: #5B5B66;
 
@@ -942,32 +941,32 @@ body {
     --shadow-color-cover-rgb: var(--bg-color);
 
     /* Light theme colors */
-    --lt-text-color: 51,51,51;
+    --lt-text-color: 51, 51, 51;
     --lt-dialog-bg-color: #fff;
-    --lt-bg-color: 255,255,255;
+    --lt-bg-color: 255, 255, 255;
     --lt-bg-color-secondary: #f2f2f2;
     --lt-border-color: #757575;
     --lt-badge-color: #757575;
     --lt-lang-hr-color: #DDD;
 
-    --lt-shadow-color-secondary-rgb: 0,0,0;
-    --lt-shadow-color-secondary-cover-rgb: 242,242,242;
-    --lt-shadow-color-dialog-rgb: 0,0,0;
-    --lt-shadow-color-dialog-cover-rgb: 242,242,242;
+    --lt-shadow-color-secondary-rgb: 0, 0, 0;
+    --lt-shadow-color-secondary-cover-rgb: 242, 242, 242;
+    --lt-shadow-color-dialog-rgb: 0, 0, 0;
+    --lt-shadow-color-dialog-cover-rgb: 242, 242, 242;
 
     /* Dark theme colors */
-    --dt-text-color: 238,238,238;
+    --dt-text-color: 238, 238, 238;
     --dt-dialog-bg-color: #141414;
-    --dt-bg-color: 0,0,0;
+    --dt-bg-color: 0, 0, 0;
     --dt-bg-color-secondary: #262628;
     --dt-border-color: #757575;
     --dt-badge-color: #757575;
     --dt-lang-hr-color: #404040;
 
-    --dt-shadow-color-secondary-rgb: 255,255,255;
-    --dt-shadow-color-secondary-cover-rgb: 38,38,38;
-    --dt-shadow-color-dialog-rgb: 255,255,255;
-    --dt-shadow-color-dialog-cover-rgb: 38,38,38;
+    --dt-shadow-color-secondary-rgb: 255, 255, 255;
+    --dt-shadow-color-secondary-cover-rgb: 38, 38, 38;
+    --dt-shadow-color-dialog-rgb: 255, 255, 255;
+    --dt-shadow-color-dialog-cover-rgb: 38, 38, 38;
 }
 
 /* Light theme colors */
@@ -988,6 +987,10 @@ body {
 
 /* Dark theme colors */
 body.dark-theme {
+    --primary-color: #eeeeee;
+    --primary-color2: #aaaaaa;
+    --paired-device-color: #eeeeee;
+    --public-room-color: #eeeeee;
     --text-color: var(--dt-text-color);
     --dialog-bg-color: var(--dt-dialog-bg-color);
     --bg-color: var(--dt-bg-color);
@@ -1007,6 +1010,10 @@ body.dark-theme {
 
     /* defaults to dark theme */
     body {
+        --primary-color: #eeeeee;
+        --primary-color2: #aaaaaa;
+        --paired-device-color: #eeeeee;
+        --public-room-color: #eeeeee;
         --text-color: var(--dt-text-color);
         --dialog-bg-color: var(--dt-dialog-bg-color);
         --bg-color: var(--dt-bg-color);
@@ -1024,6 +1031,10 @@ body.dark-theme {
 
     /* Override dark mode with light mode styles if the user decides to swap */
     body.light-theme {
+        --primary-color: #101010;
+        --primary-color2: #333333;
+        --paired-device-color: #101010;
+        --public-room-color: #101010;
         --text-color: var(--lt-text-color);
         --dialog-bg-color: var(--lt-dialog-bg-color);
         --bg-color: var(--lt-bg-color);
@@ -1051,7 +1062,7 @@ body {
     stop-color: var(--primary-color);
 }
 
-@supports (stop-color: color-mix(in srgb, blue 50%, black)) {
+@supports (stop-color: color-mix(in srgb, black 50%, black)) {
     #primaryGradient .start-color {
         stop-color: color-mix(in srgb, var(--primary-color) 80%, white);
     }
@@ -1061,6 +1072,23 @@ body {
     stop-color: var(--primary-color);
 }
 
+body.dark-theme #primaryGradient .start-color {
+    stop-color: #ffffff;
+}
+
+body.dark-theme #primaryGradient .stop-color {
+    stop-color: #1e1e1e;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) #primaryGradient .start-color {
+        stop-color: #ffffff;
+    }
+
+    body:not(.light-theme) #primaryGradient .stop-color {
+        stop-color: #1e1e1e;
+    }
+}
 
 /*
     Edge specific styles
@@ -1073,31 +1101,31 @@ body {
     }
 }
 
-/*
-    Browser specific styles
-*/
+/*    Browser specific styles*/
 
 body {
     /* mobile viewport bug fix */
-    min-height: -moz-available;          /* WebKit-based browsers will ignore this. */
-    min-height: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+    min-height: -moz-available;
+    /* WebKit-based browsers will ignore this. */
+    min-height: -webkit-fill-available;
+    /* Mozilla-based browsers will ignore this. */
     min-height: fill-available;
 }
 
 html {
-    min-height: -moz-available;          /* WebKit-based browsers will ignore this. */
-    min-height: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+    min-height: -moz-available;
+    /* WebKit-based browsers will ignore this. */
+    min-height: -webkit-fill-available;
+    /* Mozilla-based browsers will ignore this. */
     min-height: fill-available;
 }
 
-/* webkit scrollbar style*/
-
-::-webkit-scrollbar{
+::-webkit-scrollbar {
     width: 0;
     height: 0;
 }
 
-::-webkit-scrollbar-thumb{
+::-webkit-scrollbar-thumb {
     background: #bfbfbf;
     border-radius: 4px;
 }
@@ -1108,10 +1136,17 @@ html {
     background: var(--primary-color);
 }
 
-/* make elements with attribute contenteditable editable on older iOS devices.
-See note here: https://developer.mozilla.org/en-US/docs/Web/CSS/user-select */
 [contenteditable] {
     -webkit-user-select: text;
     user-select: text;
 }
 
+body.dark-theme .badge {
+    color: #111111;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .badge {
+        color: #111111;
+    }
+}

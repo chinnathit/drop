@@ -1,7 +1,1 @@
-node_modules
-.DS_Store
-/dev/certs
-qrcode-svg/
-turnserver.conf
-rtc_config.json
-ssl/
+node_modules/

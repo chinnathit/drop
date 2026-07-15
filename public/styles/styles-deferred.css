@@ -354,6 +354,26 @@ x-paper .dialog-title {
     color: white;
 }
 
+body.dark-theme x-paper .dialog-title {
+    color: #111111;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-paper .dialog-title {
+        color: #111111;
+    }
+}
+
+body.dark-theme x-dialog .btn {
+    color: #eeeeee;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-dialog .btn {
+        color: #eeeeee;
+    }
+}
+
 #pair-device-dialog,
 #edit-paired-devices-dialog {
     --accent-color: var(--paired-device-color);
@@ -542,7 +562,7 @@ x-dialog hr {
     margin: 3px;
     flex-grow: 1;
     height: 50px;
-    width: 120px; /* fixed width needed to ensure same width for all buttons */
+    width: 120px;
 }
 
 x-paper > .btn-row {
@@ -715,7 +735,7 @@ x-dialog .dialog-subheader {
 #base64-paste-dialog .textarea {
     width: 100%;
     height: 40vh;
-    border: solid 12px #438cff;
+    border: solid 12px #121212;
     margin: 6px;
 }
 
