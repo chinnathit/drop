@@ -22,92 +22,40 @@ class ThemeUI {
 
     constructor() {
         this.prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        this.prefersLightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 
-        this.$themeAutoBtn = document.getElementById('theme-auto');
-        this.$themeLightBtn = document.getElementById('theme-light');
-        this.$themeDarkBtn = document.getElementById('theme-dark');
-
-        let currentTheme = this.getCurrentTheme();
-        if (currentTheme === 'dark') {
-            this.setModeToDark();
-        } else if (currentTheme === 'light') {
+        this.$toggleBtn = document.getElementById('theme-toggle');
+        
+        if (this.getCurrentTheme() === 'light') {
             this.setModeToLight();
+        } else {
+            this.setModeToDark();
         }
 
-        this.$themeAutoBtn.addEventListener('click', _ => this.onClickAuto());
-        this.$themeLightBtn.addEventListener('click', _ => this.onClickLight());
-        this.$themeDarkBtn.addEventListener('click', _ => this.onClickDark());
+        this.$toggleBtn.addEventListener('click', _ => this.toggle());
     }
 
     getCurrentTheme() {
         return localStorage.getItem('theme');
     }
 
-    setCurrentTheme(theme) {
-        localStorage.setItem('theme', theme);
-    }
-
-    onClickAuto() {
-        if (this.getCurrentTheme()) {
-            this.setModeToAuto();
-        } else {
-            this.setModeToDark();
-        }
-    }
-
-    onClickLight() {
-        if (this.getCurrentTheme() !== 'light') {
+    toggle() {
+        if (this.getCurrentTheme() === 'dark') {
             this.setModeToLight();
         } else {
-            this.setModeToAuto();
-        }
-    }
-
-    onClickDark() {
-        if (this.getCurrentTheme() !== 'dark') {
             this.setModeToDark();
-        } else {
-            this.setModeToLight();
         }
     }
 
     setModeToDark() {
         document.body.classList.remove('light-theme');
         document.body.classList.add('dark-theme');
-
-        this.setCurrentTheme('dark');
-
-        this.$themeAutoBtn.classList.remove("selected");
-        this.$themeLightBtn.classList.remove("selected");
-        this.$themeDarkBtn.classList.add("selected");
+        localStorage.setItem('theme', 'dark');
     }
 
     setModeToLight() {
         document.body.classList.remove('dark-theme');
         document.body.classList.add('light-theme');
-
-        this.setCurrentTheme('light');
-
-        this.$themeAutoBtn.classList.remove("selected");
-        this.$themeLightBtn.classList.add("selected");
-        this.$themeDarkBtn.classList.remove("selected");
-    }
-
-    setModeToAuto() {
-        document.body.classList.remove('dark-theme');
-        document.body.classList.remove('light-theme');
-        if (this.prefersDarkTheme) {
-            document.body.classList.add('dark-theme');
-        }
-        else if (this.prefersLightTheme) {
-            document.body.classList.add('light-theme');
-        }
-        localStorage.removeItem('theme');
-
-        this.$themeAutoBtn.classList.add("selected");
-        this.$themeLightBtn.classList.remove("selected");
-        this.$themeDarkBtn.classList.remove("selected");
+        localStorage.setItem('theme', 'light');
     }
 }
 
@@ -136,12 +84,12 @@ class HeaderUI {
         let icon;
         const $headerIconsShown = document.querySelectorAll('body > header:first-of-type > *:not([hidden])');
 
-        for (let i= 1; i < $headerIconsShown.length; i++) {
-            let isFurtherLeftThanLastIcon = $headerIconsShown[i].offsetLeft >= $headerIconsShown[i-1].offsetLeft;
-            let isFurtherRightThanLastIcon = $headerIconsShown[i].offsetLeft <= $headerIconsShown[i-1].offsetLeft;
+        for (let i = 1; i < $headerIconsShown.length; i++) {
+            let isFurtherLeftThanLastIcon = $headerIconsShown[i].offsetLeft >= $headerIconsShown[i - 1].offsetLeft;
+            let isFurtherRightThanLastIcon = $headerIconsShown[i].offsetLeft <= $headerIconsShown[i - 1].offsetLeft;
             if ((!rtlLocale && isFurtherLeftThanLastIcon) || (rtlLocale && isFurtherRightThanLastIcon)) {
                 // we have found the first icon on second row. Use previous icon.
-                icon = $headerIconsShown[i-1];
+                icon = $headerIconsShown[i - 1];
                 break;
             }
         }
@@ -238,7 +186,7 @@ class FooterUI {
         Events.fire('self-display-name-changed', displayNameSaved);
     }
 
-    async _onDisplayName(displayNameServer){
+    async _onDisplayName(displayNameServer) {
         // load saved displayname first to prevent flickering
         await this._loadSavedDisplayName();
 
@@ -298,7 +246,7 @@ class FooterUI {
                 })
                 .finally(() => {
                     Events.fire('self-display-name-changed', newDisplayName);
-                    Events.fire('broadcast-send', {type: 'self-display-name-changed', detail: newDisplayName});
+                    Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: newDisplayName });
                 });
         }
         else {
@@ -310,7 +258,7 @@ class FooterUI {
                 .finally(() => {
                     Events.fire('notify-user', Localization.getTranslation("notifications.display-name-random-again"));
                     Events.fire('self-display-name-changed', '');
-                    Events.fire('broadcast-send', {type: 'self-display-name-changed', detail: ''});
+                    Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: '' });
                 });
         }
     }
@@ -355,7 +303,7 @@ class BackgroundCanvas {
         //      -> put canvas drawing into serviceworker to unblock main thread
         // otherwise
         //      -> use main thread
-        let {init, startAnimation, switchAnimation, onShareModeChange} =
+        let { init, startAnimation, switchAnimation, onShareModeChange } =
             this.$canvas.transferControlToOffscreen
                 ? this.initAnimationOffscreen()
                 : this.initAnimationOnscreen();
@@ -507,7 +455,7 @@ class BackgroundCanvas {
 
         createCanvas();
 
-        return {init, startAnimation, switchAnimation, onShareModeChange};
+        return { init, startAnimation, switchAnimation, onShareModeChange };
     }
 
     initAnimationOffscreen() {
@@ -561,6 +509,6 @@ class BackgroundCanvas {
 
         createCanvas();
 
-        return {init, startAnimation, switchAnimation, onShareModeChange};
+        return { init, startAnimation, switchAnimation, onShareModeChange };
     }
 }

@@ -20,7 +20,26 @@ class PairDrop {
             "scripts/libs/zip.min.js"
         ];
 
-        this.registerServiceWorker();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js').then(reg => {
+
+                reg.onupdatefound = () => {
+                    const newWorker = reg.installing;
+
+                    newWorker.onstatechange = () => {
+                        if (
+                            newWorker.state === 'installed' &&
+                            navigator.serviceWorker.controller
+                        ) {
+                            console.log('New version available → reloading...');
+                            window.location.reload();
+                        }
+                    };
+                };
+
+            });
+        }
 
         Events.on('beforeinstallprompt', e => this.onPwaInstallable(e));
 
@@ -66,18 +85,7 @@ class PairDrop {
 
         // Evaluate url params as soon as ws is connected
         console.log("Evaluate URL params as soon as websocket connection is established.");
-        Events.on('ws-connected', _ => this.evaluateUrlParams(), {once: true});
-    }
-
-    registerServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .register('service-worker.js')
-                .then(serviceWorker => {
-                    console.log('Service Worker registered');
-                    window.serviceWorker = serviceWorker
-                });
-        }
+        Events.on('ws-connected', _ => this.evaluateUrlParams(), { once: true });
     }
 
     onPwaInstallable(e) {
@@ -130,7 +138,7 @@ class PairDrop {
     }
 
     loadAndApplyStylesheet(url) {
-        return new Promise( async (resolve) => {
+        return new Promise(async (resolve) => {
             try {
                 await this.loadStyleSheet(url);
                 console.log(`Stylesheet loaded successfully: ${url}`);
@@ -153,7 +161,7 @@ class PairDrop {
     }
 
     loadAndApplyScript(url) {
-        return new Promise( async (resolve) => {
+        return new Promise(async (resolve) => {
             try {
                 await this.loadScript(url);
                 console.log(`Script loaded successfully: ${url}`);
