@@ -1115,3 +1115,458 @@ See note here: https://developer.mozilla.org/en-US/docs/Web/CSS/user-select */
     user-select: text;
 }
 
+/*
+    ==========================================================================
+    Drop Custom Styling v3: Monochrome Theme, Floating Dock, Badge Fix
+    ==========================================================================
+*/
+
+/* ── 1. Google Font ───────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+body {
+    font-family: 'Inter', 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── 2. Monochrome Color Variables ──────────────────────────────────────── */
+/* Light mode */
+body {
+    --primary-color:        #111111 !important;
+    --accent-color:         #111111 !important;
+    --paired-device-color:  #333333 !important;
+    --public-room-color:    #555555 !important;
+    --ws-peer-color:        #444444 !important;
+    --btn-disabled-color:   #aaaaaa !important;
+}
+
+/* Dark mode – explicit class */
+body.dark-theme {
+    --primary-color:        #f0f0f0 !important;
+    --accent-color:         #222222 !important;
+    --paired-device-color:  #cccccc !important;
+    --public-room-color:    #888888 !important;
+    --ws-peer-color:        #dddddd !important;
+    --btn-disabled-color:   #5B5B66 !important;
+}
+
+/* Dark mode – OS preference fallback */
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) {
+        --primary-color:        #f0f0f0 !important;
+        --accent-color:         #222222 !important;
+        --paired-device-color:  #cccccc !important;
+        --public-room-color:    #888888 !important;
+        --ws-peer-color:        #dddddd !important;
+        --btn-disabled-color:   #5B5B66 !important;
+    }
+}
+
+/* ── 3. Discovery Badge Text Fix (dark mode: white bg on white text bug) ─── */
+/* Light mode: badge bg is black, text stays white */
+.badge {
+    color: #ffffff !important;
+}
+
+/* Dark mode: badge bg is light grey, text must be dark */
+body.dark-theme .badge {
+    color: #111111 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .badge {
+        color: #111111 !important;
+    }
+}
+
+/* Discovery section label text ─ always readable */
+.discovery-wrapper span:not(.badge) {
+    color: rgb(var(--text-color));
+}
+
+/* ── 4. Peer Icon Wrapper – dark icons on light background ──────────────── */
+body.dark-theme x-peer .icon-wrapper,
+body.dark-theme x-peer .icon-wrapper svg {
+    color: #111111 !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-peer .icon-wrapper,
+    body:not(.light-theme) x-peer .icon-wrapper svg {
+        color: #111111 !important;
+    }
+}
+
+/* ── 5. Dialog Header Text ──────────────────────────────────────────────── */
+x-paper .dialog-title {
+    color: #ffffff !important;
+}
+
+/* ── 6. Footer Logo & Spacing ───────────────────────────────────────────── */
+footer {
+    margin-bottom: 0 !important;
+    padding-bottom: 90px !important; /* Shifts offsetHeight so circles sit behind logo */
+}
+
+footer .logo {
+    --icon-size: 72px !important; /* Larger, more prominent logo */
+    margin-bottom: 6px !important;
+    margin-top: 0 !important;
+}
+
+/* ── 7. Floating Dock ───────────────────────────────────────────────────── */
+/* Hide the original header – we'll only use the dock in a fixed container */
+body > header:first-of-type {
+    /* Reset all original header styles */
+    position: fixed !important;
+    bottom: 20px !important;
+    top: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+
+    /* Layout */
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+
+    /* Sizing – compact, fixed height, content-hugging width */
+    width: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    padding: 6px 12px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+
+    /* Glass capsule look */
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 26px !important;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 8px 32px rgba(0, 0, 0, 0.12) !important;
+
+    /* Misc */
+    z-index: 200 !important;
+    overflow: visible !important;
+    transition: opacity 300ms ease, box-shadow 300ms ease !important;
+}
+
+body.dark-theme body > header:first-of-type,
+body.dark-theme header {
+    background: rgba(28, 28, 30, 0.82) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) body > header:first-of-type,
+    body:not(.light-theme) header {
+        background: rgba(28, 28, 30, 0.82) !important;
+        border-color: rgba(255, 255, 255, 0.10) !important;
+    }
+}
+
+/* Dock hover glow */
+body > header:first-of-type:hover {
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.12),
+        0 12px 40px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* All direct children (icon buttons) */
+body > header:first-of-type > * {
+    flex-shrink: 0 !important;
+    align-self: center !important;
+    margin: 0 !important;
+}
+
+/* Divider line between sections of dock */
+body > header:first-of-type > .icon-button + .icon-button,
+body > header:first-of-type > div + div,
+body > header:first-of-type > a + a {
+    /* subtle visual gap – no extra border needed with gap */
+}
+
+/* Icon button sizing inside dock */
+body > header:first-of-type .icon-button {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    transition: background 180ms ease, transform 120ms ease !important;
+}
+
+body > header:first-of-type .icon-button:hover {
+    background: rgba(0, 0, 0, 0.07) !important;
+    transform: scale(1.1) !important;
+}
+
+body.dark-theme body > header:first-of-type .icon-button:hover,
+body.dark-theme header .icon-button:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) body > header:first-of-type .icon-button:hover,
+    body:not(.light-theme) header .icon-button:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+    }
+}
+
+/* Icon size inside dock */
+body > header:first-of-type .icon {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+/* ── 8. Theme Toggle Button (sun/moon) ──────────────────────────────────── */
+/* Hide the old three-button theme wrapper */
+#theme-wrapper {
+    display: none !important;
+}
+
+/* Theme toggle button */
+#theme-toggle {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    transition: background 180ms ease, transform 120ms ease !important;
+}
+
+#theme-toggle .theme-icon-sun,
+#theme-toggle .theme-icon-moon {
+    position: absolute !important;
+    width: 20px !important;
+    height: 20px !important;
+    transition: opacity 200ms ease, transform 200ms ease !important;
+}
+
+/* Light theme: show moon (to switch to dark) */
+body:not(.dark-theme) #theme-toggle .theme-icon-sun {
+    opacity: 0 !important;
+    transform: rotate(90deg) scale(0.6) !important;
+    pointer-events: none !important;
+}
+body:not(.dark-theme) #theme-toggle .theme-icon-moon {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* Dark theme: show sun (to switch to light) */
+body.dark-theme #theme-toggle .theme-icon-sun {
+    opacity: 1 !important;
+    transform: none !important;
+}
+body.dark-theme #theme-toggle .theme-icon-moon {
+    opacity: 0 !important;
+    transform: rotate(-90deg) scale(0.6) !important;
+    pointer-events: none !important;
+}
+
+/* OS dark pref with no explicit class */
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme):not(.dark-theme) #theme-toggle .theme-icon-sun {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    body:not(.light-theme):not(.dark-theme) #theme-toggle .theme-icon-moon {
+        opacity: 0 !important;
+        transform: rotate(-90deg) scale(0.6) !important;
+        pointer-events: none !important;
+    }
+}
+
+/* ── 9. Force-hide expand button (JS re-adds it dynamically) ───────────── */
+#expand {
+    display: none !important;
+}
+
+/* ── 10. Prevent JS HeaderUI from hiding overflow buttons ───────────────── */
+/*
+   The JS adds class 'overflow-hidden' + sets height:56px to clip hidden buttons.
+   We override both so buttons are NEVER clipped — the dock scrolls instead.
+*/
+body > header:first-of-type.overflow-hidden {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    height: auto !important;          /* don't let JS lock height */
+    min-height: 52px !important;
+    /* Hide scrollbar visually but keep it functional */
+    scrollbar-width: none !important;
+}
+body > header:first-of-type.overflow-hidden::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Also neutralise the 'overflow-expanded' height reset */
+body > header:first-of-type.overflow-expanded {
+    height: auto !important;
+    min-height: 52px !important;
+}
+
+/* ── 11. Responsive dock scaling ─────────────────────────────────────────── */
+/* Medium small screens (≤ 480px) — shrink buttons */
+@media (max-width: 480px) {
+    body > header:first-of-type {
+        padding: 5px 8px !important;
+        gap: 1px !important;
+        height: 46px !important;
+        min-height: 46px !important;
+    }
+    body > header:first-of-type .icon-button {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    body > header:first-of-type .icon {
+        width: 17px !important;
+        height: 17px !important;
+    }
+}
+
+/* iPhone SE / very small screens (≤ 375px) — shrink further */
+@media (max-width: 375px) {
+    body > header:first-of-type {
+        padding: 4px 6px !important;
+        gap: 0px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+    }
+    body > header:first-of-type .icon-button {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    body > header:first-of-type .icon {
+        width: 15px !important;
+        height: 15px !important;
+    }
+}
+
+/* ── 12. Home Button ─────────────────────────────────────────────────────── */
+#home-btn {
+    color: currentColor !important;
+}
+
+/* ── 10. Thin separator between dock groups (visual only) ───────────────── */
+.dock-sep {
+    width: 1px !important;
+    height: 20px !important;
+    background: rgba(128, 128, 128, 0.25) !important;
+    margin: 0 4px !important;
+    border-radius: 1px !important;
+    flex-shrink: 0 !important;
+}
+
+/* ── 11. Responsive – hide least-critical buttons on very small screens ─── */
+@media (max-width: 360px) {
+    #language-selector,
+    #home-btn {
+        display: none !important;
+    }
+}
+
+/* ── 12. x-no-peers text alignment ──────────────────────────────────────── */
+x-no-peers h2 {
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+}
+
+/* ── 13. Language Select Dialog – theme sync ────────────────────────────── */
+#language-select-dialog x-paper {
+    background-color: #ffffff;
+    color: #111111;
+}
+#language-select-dialog .language-buttons > .btn {
+    background-color: transparent;
+    color: #111111;
+    border-color: rgba(0, 0, 0, 0.10);
+}
+#language-select-dialog .language-buttons > .btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+#language-select-dialog .language-buttons > .current {
+    background-color: rgba(0, 0, 0, 0.06);
+    font-weight: 600;
+}
+body.dark-theme #language-select-dialog x-paper {
+    background-color: #1c1c1e;
+    color: #f0f0f0;
+}
+body.dark-theme #language-select-dialog .language-buttons > .btn {
+    background-color: transparent;
+    color: #f0f0f0;
+    border-color: rgba(255, 255, 255, 0.10);
+}
+body.dark-theme #language-select-dialog .language-buttons > .btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+body.dark-theme #language-select-dialog .language-buttons > .current {
+    background-color: rgba(255, 255, 255, 0.10);
+    font-weight: 600;
+}
+body.dark-theme #language-select-dialog .language-buttons > .current:after {
+    color: #f0f0f0;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) #language-select-dialog x-paper {
+        background-color: #1c1c1e;
+        color: #f0f0f0;
+    }
+    body:not(.light-theme) #language-select-dialog .language-buttons > .btn {
+        background-color: transparent;
+        color: #f0f0f0;
+        border-color: rgba(255, 255, 255, 0.10);
+    }
+    body:not(.light-theme) #language-select-dialog .language-buttons > .btn:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    body:not(.light-theme) #language-select-dialog .language-buttons > .current {
+        background-color: rgba(255, 255, 255, 0.10);
+        font-weight: 600;
+    }
+    body:not(.light-theme) #language-select-dialog .language-buttons > .current:after {
+        color: #f0f0f0;
+    }
+}
+
+/* ── 14. Language Dialog – compact & scrollable ─────────────────────────── */
+#language-select-dialog x-paper {
+    max-height: 72vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Scrollable language list – compact rows */
+#language-select-dialog .language-buttons {
+    overflow-y: auto !important;
+    flex: 1 1 auto !important;
+    /* Scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(128,128,128,0.3) transparent;
+}
+
+#language-select-dialog .language-buttons > .btn {
+    padding: 5px 12px !important;   /* Shorter row height */
+    font-size: 11px !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+/* Close button row stays at bottom */
+#language-select-dialog .btn-row {
+    flex-shrink: 0 !important;
+    padding: 6px 10px 8px !important;
+}
+
+/* Hide x-about completely */
+x-about {
+    display: none !important;
+}
+

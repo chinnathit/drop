@@ -345,7 +345,7 @@ class BackgroundCanvas {
 
     initAnimation() {
         this.baseColorNormal = '168 168 168';
-        this.baseColorShareMode = '168 168 255';
+        this.baseColorShareMode = '200 200 200';
         this.baseOpacityNormal = 0.3;
         this.baseOpacityShareMode = 0.8;
         this.speed = 0.5;
@@ -419,7 +419,7 @@ class BackgroundCanvas {
             let oldOffset = offset;
             w = clientWidth;
             h = clientHeight;
-            offset = footerOffsetHeight - 28;
+            offset = footerOffsetHeight - 44;
 
             if (oldW === w && oldH === h && oldOffset === offset) return; // nothing has changed
 
