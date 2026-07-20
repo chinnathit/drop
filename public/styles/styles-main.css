@@ -1195,9 +1195,19 @@ body.dark-theme x-peer .icon-wrapper svg {
     }
 }
 
-/* ── 5. Dialog Header Text ──────────────────────────────────────────────── */
+/* ── 5. Dialog Header & Button Text ───────────────────────────────────────── */
 x-paper .dialog-title {
     color: #ffffff !important;
+}
+
+/* Fix dark text on buttons in dark mode */
+body.dark-theme .btn:not([disabled]) {
+    color: #f0f0f0 !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .btn:not([disabled]) {
+        color: #f0f0f0 !important;
+    }
 }
 
 /* ── 6. Footer Logo & Spacing ───────────────────────────────────────────── */
