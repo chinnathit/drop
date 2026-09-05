@@ -228,6 +228,8 @@ class FooterUI {
         Events.on('display-name', e => this._onDisplayName(e.detail.displayName));
         Events.on('self-display-name-changed', e => this._insertDisplayName(e.detail));
         Events.on('evaluate-footer-badges', _ => this._evaluateFooterBadges());
+
+        this._loadSavedDisplayName();
     }
 
     async showLoading() {
@@ -251,30 +253,30 @@ class FooterUI {
     }
 
     async _loadSavedDisplayName() {
-        const displayNameSaved = await this._getSavedDisplayName()
+        const displayNameSaved = await this._getSavedDisplayName();
 
         if (!displayNameSaved) return;
 
-        console.log("Retrieved edited display name:", displayNameSaved)
+        this._insertDisplayName(displayNameSaved);
         Events.fire('self-display-name-changed', displayNameSaved);
     }
 
     async _onDisplayName(displayNameServer) {
-        // load saved displayname first to prevent flickering
-        await this._loadSavedDisplayName();
-
-        // set original display name as placeholder
         this.$displayName.setAttribute('placeholder', displayNameServer);
+        await this._loadSavedDisplayName();
     }
 
-
     _insertDisplayName(displayName) {
-        this.$displayName.textContent = displayName;
+        this.$displayName.textContent = displayName || '';
     }
 
     _onKeyDownDisplayName(e) {
-        if (e.key === "Enter" || e.key === "Escape") {
+        if (e.key === "Enter") {
             e.preventDefault();
+            e.target.blur();
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            this._loadSavedDisplayName();
             e.target.blur();
         }
     }
@@ -299,55 +301,46 @@ class FooterUI {
         // Remove selection from text
         window.getSelection().removeAllRanges();
 
-        await this._saveDisplayName(e.target.innerText)
+        await this._saveDisplayName(e.target.innerText);
     }
 
     async _saveDisplayName(newDisplayName) {
-        newDisplayName = newDisplayName.replace(/(\n|\r|\r\n)/, '')
+        newDisplayName = (newDisplayName || '').replace(/(\n|\r|\r\n)/g, '').trim();
         const savedDisplayName = await this._getSavedDisplayName();
         if (newDisplayName === savedDisplayName) return;
 
         if (newDisplayName) {
-            PersistentStorage.set('edited_display_name', newDisplayName)
-                .then(_ => {
-                    Events.fire('notify-user', Localization.getTranslation("notifications.display-name-changed-permanently"));
-                })
-                .catch(_ => {
-                    console.log("This browser does not support IndexedDB. Use localStorage instead.");
-                    localStorage.setItem('edited_display_name', newDisplayName);
-                    Events.fire('notify-user', Localization.getTranslation("notifications.display-name-changed-temporarily"));
-                })
-                .finally(() => {
-                    Events.fire('self-display-name-changed', newDisplayName);
-                    Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: newDisplayName });
-                });
+            localStorage.setItem('edited_display_name', newDisplayName);
+            PersistentStorage.set('edited_display_name', newDisplayName).catch(() => {});
+            Events.fire('notify-user', Localization.getTranslation("notifications.display-name-changed-permanently"));
+            Events.fire('self-display-name-changed', newDisplayName);
+            Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: newDisplayName });
         }
         else {
-            PersistentStorage.delete('edited_display_name')
-                .catch(_ => {
-                    console.log("This browser does not support IndexedDB. Use localStorage instead.")
-                    localStorage.removeItem('edited_display_name');
-                })
-                .finally(() => {
-                    Events.fire('notify-user', Localization.getTranslation("notifications.display-name-random-again"));
-                    Events.fire('self-display-name-changed', '');
-                    Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: '' });
-                });
+            localStorage.removeItem('edited_display_name');
+            PersistentStorage.delete('edited_display_name').catch(() => {});
+            Events.fire('notify-user', Localization.getTranslation("notifications.display-name-random-again"));
+            Events.fire('self-display-name-changed', '');
+            Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: '' });
         }
     }
 
     _getSavedDisplayName() {
         return new Promise((resolve) => {
+            const localName = localStorage.getItem('edited_display_name');
+            if (localName) {
+                resolve(localName);
+                return;
+            }
             PersistentStorage.get('edited_display_name')
                 .then(displayName => {
                     if (!displayName) displayName = "";
+                    if (displayName) localStorage.setItem('edited_display_name', displayName);
                     resolve(displayName);
                 })
                 .catch(_ => {
-                    let displayName = localStorage.getItem('edited_display_name');
-                    if (!displayName) displayName = "";
-                    resolve(displayName);
-                })
+                    resolve("");
+                });
         });
     }
 }
