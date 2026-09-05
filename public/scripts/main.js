@@ -39,33 +39,60 @@ class PairDrop {
     }
 
     async initialize() {
-        // Translate page before fading in
-        await this.localization.setInitialTranslation()
-        console.log("Initial translation successful.");
+        try {
+            await this.localization.setInitialTranslation();
+            console.log("Initial translation successful.");
+        } catch (e) {
+            console.error("Translation init error:", e);
+        }
 
-        // Show "Loading..." until connected to WsServer
-        await this.footerUI.showLoading();
+        try {
+            await this.footerUI.showLoading();
+        } catch (e) {
+            console.error("Footer loading error:", e);
+        }
 
-        // Evaluate css shifting UI elements and fade in UI elements
-        await this.evaluatePermissionsAndRoomSecrets();
-        await this.headerUI.evaluateOverflowing();
-        await this.headerUI.fadeIn();
-        await this.footerUI._evaluateFooterBadges();
-        await this.footerUI.fadeIn();
-        await this.centerUI.fadeIn();
-        await this.backgroundCanvas.fadeIn();
+        try {
+            await this.evaluatePermissionsAndRoomSecrets();
+        } catch (e) {
+            console.error("Permissions/RoomSecrets error:", e);
+        }
+
+        try {
+            await this.headerUI.evaluateOverflowing();
+        } catch (e) {
+            console.error("Header evaluate overflowing error:", e);
+        }
+
+        // Always fade in UI elements
+        try {
+            await this.headerUI.fadeIn();
+            await this.footerUI._evaluateFooterBadges();
+            await this.footerUI.fadeIn();
+            await this.centerUI.fadeIn();
+            await this.backgroundCanvas.fadeIn();
+        } catch (e) {
+            console.error("Fade-in error:", e);
+        }
 
         // Load deferred assets
-        console.log("Load deferred assets...");
-        await this.loadDeferredAssets();
-        console.log("Loading of deferred assets completed.");
+        try {
+            console.log("Load deferred assets...");
+            await this.loadDeferredAssets();
+            console.log("Loading of deferred assets completed.");
+        } catch (e) {
+            console.error("Deferred assets error:", e);
+        }
 
-        console.log("Hydrate UI...");
-        await this.hydrate();
-        console.log("UI hydrated.");
+        try {
+            console.log("Hydrate UI...");
+            await this.hydrate();
+            console.log("UI hydrated.");
+        } catch (e) {
+            console.error("Hydrate error:", e);
+        }
 
         // Evaluate url params as soon as ws is connected
-        console.log("Evaluate URL params as soon as websocket connection is established.");
         if (this.server && this.server._isConnected()) {
             this.evaluateUrlParams();
         } else {

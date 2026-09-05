@@ -7,8 +7,7 @@ class PersistentStorage {
         const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
         DBOpenRequest.onerror = e => {
             PersistentStorage.logBrowserNotCapable();
-            console.log('Error initializing database: ');
-            console.log(e)
+            console.log('Error initializing database: ', e);
         };
         DBOpenRequest.onsuccess = _ => {
             console.log('Database initialised.');
@@ -17,38 +16,21 @@ class PersistentStorage {
             const db = e.target.result;
             const txn = e.target.transaction;
 
-            db.onerror = e => console.log('Error loading database: ' + e);
+            db.onerror = err => console.log('Error loading database: ' + err);
 
             console.log(`Upgrading IndexedDB database from version ${e.oldVersion} to version ${e.newVersion}`);
 
-            if (e.oldVersion === 0) {
-                // initiate v1
+            if (!db.objectStoreNames.contains('keyval')) {
                 db.createObjectStore('keyval');
-                let roomSecretsObjectStore1 = db.createObjectStore('room_secrets', {autoIncrement: true});
-                roomSecretsObjectStore1.createIndex('secret', 'secret', { unique: true });
             }
-            if (e.oldVersion <= 1) {
-                // migrate to v2
-                db.createObjectStore('share_target_files');
+            if (!db.objectStoreNames.contains('room_secrets')) {
+                let roomSecretsObjectStore = db.createObjectStore('room_secrets', {autoIncrement: true});
+                roomSecretsObjectStore.createIndex('secret', 'secret', { unique: true });
+                roomSecretsObjectStore.createIndex('display_name', 'display_name');
+                roomSecretsObjectStore.createIndex('auto_accept', 'auto_accept');
             }
-            if (e.oldVersion <= 2) {
-                // migrate to v3
-                db.deleteObjectStore('share_target_files');
+            if (!db.objectStoreNames.contains('share_target_files')) {
                 db.createObjectStore('share_target_files', {autoIncrement: true});
-            }
-            if (e.oldVersion <= 3) {
-                // migrate to v4
-                let roomSecretsObjectStore4 = txn.objectStore('room_secrets');
-                roomSecretsObjectStore4.createIndex('display_name', 'display_name');
-                roomSecretsObjectStore4.createIndex('auto_accept', 'auto_accept');
-            }
-            if (e.oldVersion <= 4) {
-                // migrate to v5
-                const editedDisplayNameOld = await PersistentStorage.get('editedDisplayName');
-                if (editedDisplayNameOld) {
-                    await PersistentStorage.set('edited_display_name', editedDisplayNameOld);
-                    await PersistentStorage.delete('editedDisplayName');
-                }
             }
         }
     }
@@ -58,81 +40,97 @@ class PersistentStorage {
     }
 
     static set(key, value) {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = e => {
-                const db = e.target.result;
-                const transaction = db.transaction('keyval', 'readwrite');
-                const objectStore = transaction.objectStore('keyval');
-                const objectStoreRequest = objectStore.put(value, key);
-                objectStoreRequest.onsuccess = _ => {
-                    console.log(`Request successful. Added key-pair: ${key} - ${value}`);
-                    resolve(value);
-                };
-            }
-            DBOpenRequest.onerror = e => {
-                reject(e);
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('keyval')) {
+                        resolve(value);
+                        return;
+                    }
+                    const transaction = db.transaction('keyval', 'readwrite');
+                    const objectStore = transaction.objectStore('keyval');
+                    const objectStoreRequest = objectStore.put(value, key);
+                    objectStoreRequest.onsuccess = _ => resolve(value);
+                    objectStoreRequest.onerror = _ => resolve(value);
+                }
+                DBOpenRequest.onerror = _ => resolve(value);
+            } catch (e) {
+                resolve(value);
             }
         })
     }
 
     static get(key) {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = e => {
-                const db = e.target.result;
-                const transaction = db.transaction('keyval', 'readonly');
-                const objectStore = transaction.objectStore('keyval');
-                const objectStoreRequest = objectStore.get(key);
-                objectStoreRequest.onsuccess = _ => {
-                    console.log(`Request successful. Retrieved key-pair: ${key} - ${objectStoreRequest.result}`);
-                    resolve(objectStoreRequest.result);
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('keyval')) {
+                        resolve(null);
+                        return;
+                    }
+                    const transaction = db.transaction('keyval', 'readonly');
+                    const objectStore = transaction.objectStore('keyval');
+                    const objectStoreRequest = objectStore.get(key);
+                    objectStoreRequest.onsuccess = _ => resolve(objectStoreRequest.result);
+                    objectStoreRequest.onerror = _ => resolve(null);
                 }
-            }
-            DBOpenRequest.onerror = e => {
-                reject(e);
+                DBOpenRequest.onerror = _ => resolve(null);
+            } catch (e) {
+                resolve(null);
             }
         });
     }
 
     static delete(key) {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = e => {
-                const db = e.target.result;
-                const transaction = db.transaction('keyval', 'readwrite');
-                const objectStore = transaction.objectStore('keyval');
-                const objectStoreRequest = objectStore.delete(key);
-                objectStoreRequest.onsuccess = _ => {
-                    console.log(`Request successful. Deleted key: ${key}`);
-                    resolve();
-                };
-            }
-            DBOpenRequest.onerror = e => {
-                reject(e);
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('keyval')) {
+                        resolve();
+                        return;
+                    }
+                    const transaction = db.transaction('keyval', 'readwrite');
+                    const objectStore = transaction.objectStore('keyval');
+                    const objectStoreRequest = objectStore.delete(key);
+                    objectStoreRequest.onsuccess = _ => resolve();
+                    objectStoreRequest.onerror = _ => resolve();
+                }
+                DBOpenRequest.onerror = _ => resolve();
+            } catch (e) {
+                resolve();
             }
         })
     }
 
     static addRoomSecret(roomSecret, displayName, deviceName) {
         return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = e => {
-                const db = e.target.result;
-                const transaction = db.transaction('room_secrets', 'readwrite');
-                const objectStore = transaction.objectStore('room_secrets');
-                const objectStoreRequest = objectStore.add({
-                    'secret': roomSecret,
-                    'display_name': displayName,
-                    'device_name': deviceName,
-                    'auto_accept': false
-                });
-                objectStoreRequest.onsuccess = e => {
-                    console.log(`Request successful. RoomSecret added: ${e.target.result}`);
-                    resolve();
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('room_secrets')) {
+                        resolve();
+                        return;
+                    }
+                    const transaction = db.transaction('room_secrets', 'readwrite');
+                    const objectStore = transaction.objectStore('room_secrets');
+                    const objectStoreRequest = objectStore.add({
+                        'secret': roomSecret,
+                        'display_name': displayName,
+                        'device_name': deviceName,
+                        'auto_accept': false
+                    });
+                    objectStoreRequest.onsuccess = _ => resolve();
+                    objectStoreRequest.onerror = err => reject(err);
                 }
-            }
-            DBOpenRequest.onerror = e => {
+                DBOpenRequest.onerror = err => reject(err);
+            } catch (e) {
                 reject(e);
             }
         })
@@ -142,11 +140,14 @@ class PersistentStorage {
         try {
             const roomSecrets = await this.getAllRoomSecretEntries();
             let secrets = [];
-            for (let i = 0; i < roomSecrets.length; i++) {
-                secrets.push(roomSecrets[i].secret);
+            if (Array.isArray(roomSecrets)) {
+                for (let i = 0; i < roomSecrets.length; i++) {
+                    if (roomSecrets[i] && roomSecrets[i].secret) {
+                        secrets.push(roomSecrets[i].secret);
+                    }
+                }
             }
-            console.log(`Request successful. Retrieved ${secrets.length} room_secrets`);
-            return(secrets);
+            return secrets;
         } catch (e) {
             this.logBrowserNotCapable();
             return [];
@@ -154,103 +155,116 @@ class PersistentStorage {
     }
 
     static getAllRoomSecretEntries() {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = (e) => {
-                const db = e.target.result;
-                const transaction = db.transaction('room_secrets', 'readonly');
-                const objectStore = transaction.objectStore('room_secrets');
-                const objectStoreRequest = objectStore.getAll();
-                objectStoreRequest.onsuccess = e => {
-                    resolve(e.target.result);
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('room_secrets')) {
+                        resolve([]);
+                        return;
+                    }
+                    const transaction = db.transaction('room_secrets', 'readonly');
+                    const objectStore = transaction.objectStore('room_secrets');
+                    const objectStoreRequest = objectStore.getAll();
+                    objectStoreRequest.onsuccess = evt => resolve(evt.target.result || []);
+                    objectStoreRequest.onerror = _ => resolve([]);
                 }
-            }
-            DBOpenRequest.onerror = (e) => {
-                reject(e);
+                DBOpenRequest.onerror = _ => resolve([]);
+            } catch (e) {
+                resolve([]);
             }
         });
     }
 
     static getRoomSecretEntry(roomSecret) {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = e => {
-                const db = e.target.result;
-                const transaction = db.transaction('room_secrets', 'readonly');
-                const objectStore = transaction.objectStore('room_secrets');
-                const objectStoreRequestKey = objectStore.index("secret").getKey(roomSecret);
-                objectStoreRequestKey.onsuccess = e => {
-                    const key = e.target.result;
-                    if (!key) {
-                        console.log(`Nothing to retrieve. Entry for room_secret not existing: ${roomSecret}`);
-                        resolve();
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('room_secrets')) {
+                        resolve(null);
                         return;
                     }
-                    const objectStoreRequestRetrieval = objectStore.get(key);
-                    objectStoreRequestRetrieval.onsuccess = e => {
-                        console.log(`Request successful. Retrieved entry for room_secret: ${key}`);
-                        resolve({
-                            "entry": e.target.result,
-                            "key": key
-                        });
-                    }
-                    objectStoreRequestRetrieval.onerror = (e) => {
-                        reject(e);
-                    }
-                };
-            }
-            DBOpenRequest.onerror = (e) => {
-                reject(e);
+                    const transaction = db.transaction('room_secrets', 'readonly');
+                    const objectStore = transaction.objectStore('room_secrets');
+                    const objectStoreRequestKey = objectStore.index("secret").getKey(roomSecret);
+                    objectStoreRequestKey.onsuccess = evt => {
+                        const key = evt.target.result;
+                        if (!key) {
+                            resolve(null);
+                            return;
+                        }
+                        const objectStoreRequestRetrieval = objectStore.get(key);
+                        objectStoreRequestRetrieval.onsuccess = retEvt => {
+                            resolve({
+                                "entry": retEvt.target.result,
+                                "key": key
+                            });
+                        }
+                        objectStoreRequestRetrieval.onerror = _ => resolve(null);
+                    };
+                    objectStoreRequestKey.onerror = _ => resolve(null);
+                }
+                DBOpenRequest.onerror = _ => resolve(null);
+            } catch (e) {
+                resolve(null);
             }
         });
     }
 
     static deleteRoomSecret(roomSecret) {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = (e) => {
-                const db = e.target.result;
-                const transaction = db.transaction('room_secrets', 'readwrite');
-                const objectStore = transaction.objectStore('room_secrets');
-                const objectStoreRequestKey = objectStore.index("secret").getKey(roomSecret);
-                objectStoreRequestKey.onsuccess = e => {
-                    if (!e.target.result) {
-                        console.log(`Nothing to delete. room_secret not existing: ${roomSecret}`);
-                        resolve();
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('room_secrets')) {
+                        resolve(roomSecret);
                         return;
                     }
-                    const key = e.target.result;
-                    const objectStoreRequestDeletion = objectStore.delete(key);
-                    objectStoreRequestDeletion.onsuccess = _ => {
-                        console.log(`Request successful. Deleted room_secret: ${key}`);
-                        resolve(roomSecret);
-                    }
-                    objectStoreRequestDeletion.onerror = e => {
-                        reject(e);
-                    }
-                };
-            }
-            DBOpenRequest.onerror = e => {
-                reject(e);
+                    const transaction = db.transaction('room_secrets', 'readwrite');
+                    const objectStore = transaction.objectStore('room_secrets');
+                    const objectStoreRequestKey = objectStore.index("secret").getKey(roomSecret);
+                    objectStoreRequestKey.onsuccess = evt => {
+                        if (!evt.target.result) {
+                            resolve(roomSecret);
+                            return;
+                        }
+                        const key = evt.target.result;
+                        const objectStoreRequestDeletion = objectStore.delete(key);
+                        objectStoreRequestDeletion.onsuccess = _ => resolve(roomSecret);
+                        objectStoreRequestDeletion.onerror = _ => resolve(roomSecret);
+                    };
+                    objectStoreRequestKey.onerror = _ => resolve(roomSecret);
+                }
+                DBOpenRequest.onerror = _ => resolve(roomSecret);
+            } catch (e) {
+                resolve(roomSecret);
             }
         })
     }
 
     static clearRoomSecrets() {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = (e) => {
-                const db = e.target.result;
-                const transaction = db.transaction('room_secrets', 'readwrite');
-                const objectStore = transaction.objectStore('room_secrets');
-                const objectStoreRequest = objectStore.clear();
-                objectStoreRequest.onsuccess = _ => {
-                    console.log('Request successful. All room_secrets cleared');
-                    resolve();
-                };
-            }
-            DBOpenRequest.onerror = e => {
-                reject(e);
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('room_secrets')) {
+                        resolve();
+                        return;
+                    }
+                    const transaction = db.transaction('room_secrets', 'readwrite');
+                    const objectStore = transaction.objectStore('room_secrets');
+                    const objectStoreRequest = objectStore.clear();
+                    objectStoreRequest.onsuccess = _ => resolve();
+                    objectStoreRequest.onerror = _ => resolve();
+                }
+                DBOpenRequest.onerror = _ => resolve();
+            } catch (e) {
+                resolve();
             }
         })
     }
@@ -264,44 +278,45 @@ class PersistentStorage {
     }
 
     static updateRoomSecret(roomSecret, updatedRoomSecret = undefined, updatedDisplayName = undefined, updatedDeviceName = undefined, updatedAutoAccept = undefined) {
-        return new Promise((resolve, reject) => {
-            const DBOpenRequest = window.indexedDB.open('pairdrop_store');
-            DBOpenRequest.onsuccess = e => {
-                const db = e.target.result;
-                this.getRoomSecretEntry(roomSecret)
-                    .then(roomSecretEntry => {
-                        if (!roomSecretEntry) {
-                            resolve(false);
-                            return;
-                        }
-                        const transaction = db.transaction('room_secrets', 'readwrite');
-                        const objectStore = transaction.objectStore('room_secrets');
-                        // Do not use `updatedRoomSecret ?? roomSecretEntry.entry.secret` to ensure compatibility with older browsers
-                        const updatedRoomSecretEntry = {
-                            'secret': updatedRoomSecret !== undefined ? updatedRoomSecret : roomSecretEntry.entry.secret,
-                            'display_name': updatedDisplayName !== undefined ? updatedDisplayName : roomSecretEntry.entry.display_name,
-                            'device_name': updatedDeviceName !== undefined ? updatedDeviceName : roomSecretEntry.entry.device_name,
-                            'auto_accept': updatedAutoAccept !== undefined ? updatedAutoAccept : roomSecretEntry.entry.auto_accept
-                        };
+        return new Promise((resolve) => {
+            try {
+                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
+                DBOpenRequest.onsuccess = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('room_secrets')) {
+                        resolve(false);
+                        return;
+                    }
+                    this.getRoomSecretEntry(roomSecret)
+                        .then(roomSecretEntry => {
+                            if (!roomSecretEntry) {
+                                resolve(false);
+                                return;
+                            }
+                            const transaction = db.transaction('room_secrets', 'readwrite');
+                            const objectStore = transaction.objectStore('room_secrets');
+                            const updatedRoomSecretEntry = {
+                                'secret': updatedRoomSecret !== undefined ? updatedRoomSecret : roomSecretEntry.entry.secret,
+                                'display_name': updatedDisplayName !== undefined ? updatedDisplayName : roomSecretEntry.entry.display_name,
+                                'device_name': updatedDeviceName !== undefined ? updatedDeviceName : roomSecretEntry.entry.device_name,
+                                'auto_accept': updatedAutoAccept !== undefined ? updatedAutoAccept : roomSecretEntry.entry.auto_accept
+                            };
 
-                        const objectStoreRequestUpdate = objectStore.put(updatedRoomSecretEntry, roomSecretEntry.key);
-
-                        objectStoreRequestUpdate.onsuccess = e => {
-                            console.log(`Request successful. Updated room_secret: ${roomSecretEntry.key}`);
-                            resolve({
-                                "entry": updatedRoomSecretEntry,
-                                "key": roomSecretEntry.key
-                            });
-                        }
-
-                        objectStoreRequestUpdate.onerror = (e) => {
-                            reject(e);
-                        }
-                    })
-                    .catch(e => reject(e));
-            };
-
-            DBOpenRequest.onerror = e => reject(e);
+                            const objectStoreRequestUpdate = objectStore.put(updatedRoomSecretEntry, roomSecretEntry.key);
+                            objectStoreRequestUpdate.onsuccess = _ => {
+                                resolve({
+                                    "entry": updatedRoomSecretEntry,
+                                    "key": roomSecretEntry.key
+                                });
+                            }
+                            objectStoreRequestUpdate.onerror = _ => resolve(false);
+                        })
+                        .catch(_ => resolve(false));
+                };
+                DBOpenRequest.onerror = _ => resolve(false);
+            } catch (e) {
+                resolve(false);
+            }
         })
     }
 }
