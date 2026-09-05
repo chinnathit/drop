@@ -1,4 +1,4 @@
-const cacheVersion = 'v1.11.2-drop11';
+const cacheVersion = 'v1.11.2-drop12';
 const cacheTitle = `pairdrop-cache-${cacheVersion}`;
 const relativePathsToCache = [
     './',

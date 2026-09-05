@@ -1202,6 +1202,22 @@ x-no-peers {
     box-shadow: none !important;
 }
 
+x-peers:not(:empty) ~ x-no-peers {
+    display: none !important;
+}
+
+x-peers:empty {
+    display: none !important;
+}
+
+x-peers:empty ~ x-instructions {
+    display: none !important;
+}
+
+x-peers:not(:empty) ~ x-instructions {
+    display: flex !important;
+}
+
 x-no-peers h2 {
     font-size: 16.5px !important;
     font-weight: 600 !important;
@@ -1301,6 +1317,20 @@ x-peer .device-name {
 
 body.dark-theme x-peer .device-name {
     color: #94a3b8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-peer {
+        background: rgba(22, 26, 38, 0.92) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+    }
+    body:not(.light-theme) x-peer .name {
+        color: #f3f4f6 !important;
+    }
+    body:not(.light-theme) x-peer .device-name {
+        color: #94a3b8 !important;
+    }
 }
 
 /* ── 3. 3D Device Showcase Stage (Centered in Hero) ───────────────────────── */
@@ -1427,6 +1457,14 @@ body.dark-theme .phone-bezel {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 -10px 40px rgba(0, 0, 0, 0.6), 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 60px rgba(99, 102, 241, 0.16) !important;
 }
 
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .phone-bezel {
+        background: #0c0e14 !important;
+        border: 2px solid #333a4d !important;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 -10px 40px rgba(0, 0, 0, 0.6), 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 60px rgba(99, 102, 241, 0.16) !important;
+    }
+}
+
 .phone-screen {
     width: 100% !important;
     height: 100% !important;
@@ -1450,6 +1488,15 @@ body.dark-theme .wallpaper-sunset {
     background-image: url('../images/wallpaper-iphone-dark.png') !important;
     background-size: cover !important;
     background-position: center !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .wallpaper-sunset {
+        background-color: #0b0f19 !important;
+        background-image: url('../images/wallpaper-iphone-dark.png') !important;
+        background-size: cover !important;
+        background-position: center !important;
+    }
 }
 
 .phone-status-bar {
@@ -1520,6 +1567,13 @@ body.dark-theme .phone-radar-scanner .logo {
     filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.45)) drop-shadow(0 4px 18px rgba(99, 102, 241, 0.5)) !important;
 }
 
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .phone-radar-scanner .logo {
+        fill: #ffffff !important;
+        filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.45)) drop-shadow(0 4px 18px rgba(99, 102, 241, 0.5)) !important;
+    }
+}
+
 /* ── 6. Frosted Identity Card inside Phone Screen ──────────────────────────── */
 .phone-identity-card {
     background: rgba(255, 255, 255, 0.96) !important;
@@ -1538,11 +1592,21 @@ body.dark-theme .phone-radar-scanner .logo {
 }
 
 body.dark-theme .phone-identity-card {
-    background: rgba(18, 24, 38, 0.82) !important;
+    background: rgba(18, 24, 38, 0.88) !important;
     backdrop-filter: blur(28px) !important;
     -webkit-backdrop-filter: blur(28px) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .phone-identity-card {
+        background: rgba(18, 24, 38, 0.88) !important;
+        backdrop-filter: blur(28px) !important;
+        -webkit-backdrop-filter: blur(28px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+    }
 }
 
 .known-as-wrapper {
@@ -1561,6 +1625,16 @@ body.dark-theme .phone-identity-card {
     color: #64748b !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
+}
+
+body.dark-theme .known-as-wrapper > span {
+    color: #94a3b8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .known-as-wrapper > span {
+        color: #94a3b8 !important;
+    }
 }
 
 .name-edit-box {
@@ -1841,11 +1915,25 @@ body:not(.dark-theme) #theme-toggle .theme-icon-moon {
 body.dark-theme #theme-toggle .theme-icon-sun {
     opacity: 1 !important;
     transform: none !important;
+    pointer-events: auto !important;
 }
 body.dark-theme #theme-toggle .theme-icon-moon {
     opacity: 0 !important;
     transform: rotate(-90deg) scale(0.6) !important;
     pointer-events: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) #theme-toggle .theme-icon-sun {
+        opacity: 1 !important;
+        transform: none !important;
+        pointer-events: auto !important;
+    }
+    body:not(.light-theme) #theme-toggle .theme-icon-moon {
+        opacity: 0 !important;
+        transform: rotate(-90deg) scale(0.6) !important;
+        pointer-events: none !important;
+    }
 }
 
 #expand {
@@ -2075,6 +2163,22 @@ x-about {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
+    }
+
+    x-peers:not(:empty) ~ x-no-peers {
+        display: none !important;
+    }
+
+    x-peers:empty {
+        display: none !important;
+    }
+
+    x-peers:empty ~ x-instructions {
+        display: none !important;
+    }
+
+    x-peers:not(:empty) ~ x-instructions {
+        display: flex !important;
     }
 
     x-no-peers h2 {
