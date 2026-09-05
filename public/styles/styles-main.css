@@ -1930,6 +1930,19 @@ body.dark-theme .key {
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.key-qr-code:hover {
+    transform: scale(1.03) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.22) !important;
+}
+
+.key-qr-code svg {
+    display: block !important;
+    border-radius: 6px !important;
+    max-width: 100% !important;
+    height: auto !important;
 }
 
 .input-key-container > input {
