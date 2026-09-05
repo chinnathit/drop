@@ -66,7 +66,11 @@ class PairDrop {
 
         // Evaluate url params as soon as ws is connected
         console.log("Evaluate URL params as soon as websocket connection is established.");
-        Events.on('ws-connected', _ => this.evaluateUrlParams(), {once: true});
+        if (this.server && this.server._isConnected()) {
+            this.evaluateUrlParams();
+        } else {
+            Events.on('ws-connected', _ => this.evaluateUrlParams(), {once: true});
+        }
     }
 
     registerServiceWorker() {

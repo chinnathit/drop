@@ -117,7 +117,7 @@ class ServerConnection {
 
     _onJoinPublicRoom(roomId, createIfInvalid) {
         if (!this._isConnected()) {
-            setTimeout(() => this._onJoinPublicRoom(roomId), 1000);
+            setTimeout(() => this._onJoinPublicRoom(roomId, createIfInvalid), 1000);
             return;
         }
         this.send({ type: 'join-public-room', publicRoomId: roomId, createIfInvalid: createIfInvalid });

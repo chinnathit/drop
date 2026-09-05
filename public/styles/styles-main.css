@@ -1580,3 +1580,264 @@ x-about {
     display: none !important;
 }
 
+/* ── 15. Theme Contrast & Dialog Accessibility Fixes ────────────────────── */
+
+/* Base Dialog Paper */
+x-dialog x-paper {
+    background-color: #ffffff;
+    color: #111111;
+    border-radius: 20px !important;
+}
+body.dark-theme x-dialog x-paper {
+    background-color: #1c1c1e !important;
+    color: #f0f0f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-dialog x-paper {
+        background-color: #1c1c1e !important;
+        color: #f0f0f0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+}
+
+/* Dialog Header Row */
+x-paper > .row:first-of-type {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 12px 16px !important;
+}
+body.dark-theme x-paper > .row:first-of-type {
+    background-color: #2c2c2e !important;
+    color: #f0f0f0 !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-paper > .row:first-of-type {
+        background-color: #2c2c2e !important;
+        color: #f0f0f0 !important;
+    }
+}
+x-paper .dialog-title {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 1.15rem !important;
+}
+
+/* Dialog Text, Subheadings, Labels, Instructions */
+x-dialog p,
+x-dialog label,
+x-dialog .font-subheading,
+x-dialog .key-instructions,
+x-dialog .dialog-subheader,
+x-dialog span:not(.badge) {
+    color: #111111;
+}
+body.dark-theme x-dialog p,
+body.dark-theme x-dialog label,
+body.dark-theme x-dialog .font-subheading,
+body.dark-theme x-dialog .key-instructions,
+body.dark-theme x-dialog .dialog-subheader,
+body.dark-theme x-dialog span:not(.badge) {
+    color: #f0f0f0 !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-dialog p,
+    body:not(.light-theme) x-dialog label,
+    body:not(.light-theme) x-dialog .font-subheading,
+    body:not(.light-theme) x-dialog .key-instructions,
+    body:not(.light-theme) x-dialog .dialog-subheader,
+    body:not(.light-theme) x-dialog span:not(.badge) {
+        color: #f0f0f0 !important;
+    }
+}
+
+/* Key Display (Pair Code / Room Code) */
+.key {
+    color: #111111 !important;
+    font-weight: 700 !important;
+}
+body.dark-theme .key {
+    color: #ffffff !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .key {
+        color: #ffffff !important;
+    }
+}
+
+/* QR Code Card - High contrast white card for camera readability in all themes */
+.key-qr-code {
+    background: #ffffff !important;
+    padding: 10px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform 150ms ease, box-shadow 150ms ease !important;
+}
+.key-qr-code:hover {
+    transform: scale(1.03) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18) !important;
+}
+.key-qr-code svg {
+    display: block !important;
+}
+
+/* Input Key Character Boxes (6-digit / 5-letter codes) */
+.input-key-container > input {
+    background-color: #f0f0f4 !important;
+    color: #111111 !important;
+    border: 1.5px solid rgba(0, 0, 0, 0.15) !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+.input-key-container > input:not([disabled]):focus {
+    border-color: #111111 !important;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12) !important;
+}
+body.dark-theme .input-key-container > input {
+    background-color: #2c2c2e !important;
+    color: #ffffff !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+}
+body.dark-theme .input-key-container > input:not([disabled]):focus {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .input-key-container > input {
+        background-color: #2c2c2e !important;
+        color: #ffffff !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+    }
+    body:not(.light-theme) .input-key-container > input:not([disabled]):focus {
+        border-color: #ffffff !important;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+    }
+}
+
+/* OR divider between QR and Key input */
+.hr-note hr {
+    background-color: rgba(128, 128, 128, 0.25) !important;
+}
+.hr-note > div > span {
+    background-color: #ffffff !important;
+    color: #666666 !important;
+    border: 2px solid rgba(0, 0, 0, 0.12) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+body.dark-theme .hr-note > div > span {
+    background-color: #1c1c1e !important;
+    color: #aaaaaa !important;
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .hr-note > div > span {
+        background-color: #1c1c1e !important;
+        color: #aaaaaa !important;
+        border: 2px solid rgba(255, 255, 255, 0.15) !important;
+    }
+}
+
+/* Paired Devices List */
+.paired-device > .display-name,
+.paired-device > .device-name {
+    color: #111111 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+body.dark-theme .paired-device > .display-name,
+body.dark-theme .paired-device > .device-name {
+    color: #f0f0f0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .paired-device > .display-name,
+    body:not(.light-theme) .paired-device > .device-name {
+        color: #f0f0f0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+}
+
+/* Textarea / Message dialogs */
+.textarea {
+    background-color: #f2f2f5 !important;
+    color: #111111 !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+body.dark-theme .textarea {
+    background-color: #262628 !important;
+    color: #f0f0f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .textarea {
+        background-color: #262628 !important;
+        color: #f0f0f0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+}
+
+/* Dialog Buttons */
+.btn-grey {
+    background-color: #f0f0f4 !important;
+    color: #111111 !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 12px !important;
+    font-weight: 500 !important;
+    transition: background-color 150ms ease !important;
+}
+.btn-grey:hover:not([disabled]) {
+    background-color: #e2e2e8 !important;
+}
+.btn-grey[disabled] {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+}
+body.dark-theme .btn-grey {
+    background-color: #2c2c2e !important;
+    color: #f0f0f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+body.dark-theme .btn-grey:hover:not([disabled]) {
+    background-color: #3a3a3c !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .btn-grey {
+        background-color: #2c2c2e !important;
+        color: #f0f0f0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    }
+    body:not(.light-theme) .btn-grey:hover:not([disabled]) {
+        background-color: #3a3a3c !important;
+    }
+}
+
+/* Toast Notifications */
+x-toast {
+    background: rgba(17, 17, 17, 0.92) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+}
+body.dark-theme x-toast {
+    background: rgba(36, 36, 38, 0.94) !important;
+    color: #f0f0f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) x-toast {
+        background: rgba(36, 36, 38, 0.94) !important;
+        color: #f0f0f0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+}
+
+

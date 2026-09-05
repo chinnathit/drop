@@ -82,7 +82,7 @@ const zipper = (() => {
                 throw new Error("Zip file closed");
             }
         },
-        async getZipFile(filename = "archive.zip") {
+        async getZipFile(filename = "Drop_files.zip") {
             if (zipWriter) {
                 const file = new File([await zipWriter.close()], filename, {type: "application/zip"});
                 zipWriter = null;
