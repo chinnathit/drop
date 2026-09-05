@@ -27,6 +27,7 @@ class ThemeUI {
         this.$themeAutoBtn = document.getElementById('theme-auto');
         this.$themeLightBtn = document.getElementById('theme-light');
         this.$themeDarkBtn = document.getElementById('theme-dark');
+        this.$themeToggleBtn = document.getElementById('theme-toggle');
 
         let currentTheme = this.getCurrentTheme();
         if (currentTheme === 'dark') {
@@ -35,9 +36,12 @@ class ThemeUI {
             this.setModeToLight();
         }
 
-        this.$themeAutoBtn.addEventListener('click', _ => this.onClickAuto());
-        this.$themeLightBtn.addEventListener('click', _ => this.onClickLight());
-        this.$themeDarkBtn.addEventListener('click', _ => this.onClickDark());
+        if (this.$themeAutoBtn) this.$themeAutoBtn.addEventListener('click', _ => this.onClickAuto());
+        if (this.$themeLightBtn) this.$themeLightBtn.addEventListener('click', _ => this.onClickLight());
+        if (this.$themeDarkBtn) this.$themeDarkBtn.addEventListener('click', _ => this.onClickDark());
+        if (this.$themeToggleBtn) {
+            this.$themeToggleBtn.addEventListener('click', _ => this.toggleTheme());
+        }
     }
 
     getCurrentTheme() {
@@ -46,6 +50,20 @@ class ThemeUI {
 
     setCurrentTheme(theme) {
         localStorage.setItem('theme', theme);
+    }
+
+    toggleTheme() {
+        if (document.body.classList.contains('dark-theme')) {
+            this.setModeToLight();
+        } else if (document.body.classList.contains('light-theme')) {
+            this.setModeToDark();
+        } else {
+            if (this.prefersDarkTheme) {
+                this.setModeToLight();
+            } else {
+                this.setModeToDark();
+            }
+        }
     }
 
     onClickAuto() {
@@ -78,9 +96,10 @@ class ThemeUI {
 
         this.setCurrentTheme('dark');
 
-        this.$themeAutoBtn.classList.remove("selected");
-        this.$themeLightBtn.classList.remove("selected");
-        this.$themeDarkBtn.classList.add("selected");
+        if (this.$themeAutoBtn) this.$themeAutoBtn.classList.remove("selected");
+        if (this.$themeLightBtn) this.$themeLightBtn.classList.remove("selected");
+        if (this.$themeDarkBtn) this.$themeDarkBtn.classList.add("selected");
+        Events.fire('theme-changed');
     }
 
     setModeToLight() {
@@ -89,9 +108,10 @@ class ThemeUI {
 
         this.setCurrentTheme('light');
 
-        this.$themeAutoBtn.classList.remove("selected");
-        this.$themeLightBtn.classList.add("selected");
-        this.$themeDarkBtn.classList.remove("selected");
+        if (this.$themeAutoBtn) this.$themeAutoBtn.classList.remove("selected");
+        if (this.$themeLightBtn) this.$themeLightBtn.classList.add("selected");
+        if (this.$themeDarkBtn) this.$themeDarkBtn.classList.remove("selected");
+        Events.fire('theme-changed');
     }
 
     setModeToAuto() {
@@ -105,9 +125,10 @@ class ThemeUI {
         }
         localStorage.removeItem('theme');
 
-        this.$themeAutoBtn.classList.add("selected");
-        this.$themeLightBtn.classList.remove("selected");
-        this.$themeDarkBtn.classList.remove("selected");
+        if (this.$themeAutoBtn) this.$themeAutoBtn.classList.add("selected");
+        if (this.$themeLightBtn) this.$themeLightBtn.classList.remove("selected");
+        if (this.$themeDarkBtn) this.$themeDarkBtn.classList.remove("selected");
+        Events.fire('theme-changed');
     }
 }
 
@@ -136,12 +157,12 @@ class HeaderUI {
         let icon;
         const $headerIconsShown = document.querySelectorAll('body > header:first-of-type > *:not([hidden])');
 
-        for (let i= 1; i < $headerIconsShown.length; i++) {
-            let isFurtherLeftThanLastIcon = $headerIconsShown[i].offsetLeft >= $headerIconsShown[i-1].offsetLeft;
-            let isFurtherRightThanLastIcon = $headerIconsShown[i].offsetLeft <= $headerIconsShown[i-1].offsetLeft;
+        for (let i = 1; i < $headerIconsShown.length; i++) {
+            let isFurtherLeftThanLastIcon = $headerIconsShown[i].offsetLeft >= $headerIconsShown[i - 1].offsetLeft;
+            let isFurtherRightThanLastIcon = $headerIconsShown[i].offsetLeft <= $headerIconsShown[i - 1].offsetLeft;
             if ((!rtlLocale && isFurtherLeftThanLastIcon) || (rtlLocale && isFurtherRightThanLastIcon)) {
                 // we have found the first icon on second row. Use previous icon.
-                icon = $headerIconsShown[i-1];
+                icon = $headerIconsShown[i - 1];
                 break;
             }
         }
@@ -238,7 +259,7 @@ class FooterUI {
         Events.fire('self-display-name-changed', displayNameSaved);
     }
 
-    async _onDisplayName(displayNameServer){
+    async _onDisplayName(displayNameServer) {
         // load saved displayname first to prevent flickering
         await this._loadSavedDisplayName();
 
@@ -298,7 +319,7 @@ class FooterUI {
                 })
                 .finally(() => {
                     Events.fire('self-display-name-changed', newDisplayName);
-                    Events.fire('broadcast-send', {type: 'self-display-name-changed', detail: newDisplayName});
+                    Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: newDisplayName });
                 });
         }
         else {
@@ -310,7 +331,7 @@ class FooterUI {
                 .finally(() => {
                     Events.fire('notify-user', Localization.getTranslation("notifications.display-name-random-again"));
                     Events.fire('self-display-name-changed', '');
-                    Events.fire('broadcast-send', {type: 'self-display-name-changed', detail: ''});
+                    Events.fire('broadcast-send', { type: 'self-display-name-changed', detail: '' });
                 });
         }
     }
@@ -341,6 +362,9 @@ class BackgroundCanvas {
 
     async fadeIn() {
         this.$canvas.classList.remove('opacity-0');
+        Events.fire('redraw-canvas');
+        setTimeout(() => Events.fire('redraw-canvas'), 100);
+        setTimeout(() => Events.fire('redraw-canvas'), 400);
     }
 
     initAnimation() {
@@ -355,7 +379,7 @@ class BackgroundCanvas {
         //      -> put canvas drawing into serviceworker to unblock main thread
         // otherwise
         //      -> use main thread
-        let {init, startAnimation, switchAnimation, onShareModeChange} =
+        let { init, startAnimation, switchAnimation, onShareModeChange } =
             this.$canvas.transferControlToOffscreen
                 ? this.initAnimationOffscreen()
                 : this.initAnimationOnscreen();
@@ -367,6 +391,7 @@ class BackgroundCanvas {
         Events.on('resize', _ => init());
         Events.on('redraw-canvas', _ => init());
         Events.on('translation-loaded', _ => init());
+        window.addEventListener('load', _ => init());
 
         // ShareMode
         Events.on('share-mode-changed', e => onShareModeChange(e.detail.active));
@@ -409,24 +434,58 @@ class BackgroundCanvas {
             baseOpacity = baseOpacityNormal;
         }
 
-        function init() {
-            initCanvas($footer.offsetHeight, document.documentElement.clientWidth, document.documentElement.clientHeight);
+        function getCenter() {
+            const $radar = document.querySelector('.phone-radar-scanner');
+            if ($radar) {
+                const rect = $radar.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0 && rect.top > 0) {
+                    return {
+                        x: Math.round(rect.left + rect.width / 2),
+                        y: Math.round(rect.top + rect.height / 2)
+                    };
+                }
+            }
+            const $phone = document.querySelector('.phone-center');
+            if ($phone) {
+                const rect = $phone.getBoundingClientRect();
+                if (rect.height > 0 && rect.top > 0) {
+                    return {
+                        x: Math.round(rect.left + rect.width / 2),
+                        y: Math.round(rect.top + 70)
+                    };
+                }
+            }
+            const clientH = document.documentElement.clientHeight || window.innerHeight;
+            const clientW = document.documentElement.clientWidth || window.innerWidth;
+            return {
+                x: Math.round(clientW / 2),
+                y: Math.round(clientH - 220)
+            };
         }
 
-        function initCanvas(footerOffsetHeight, clientWidth, clientHeight) {
+        function init() {
+            const center = getCenter();
+            initCanvas($footer.offsetHeight, document.documentElement.clientWidth, document.documentElement.clientHeight, center.x, center.y);
+        }
+
+        function initCanvas(footerOffsetHeight, clientWidth, clientHeight, customX, customY) {
             let oldW = w;
             let oldH = h;
             let oldOffset = offset;
+            let oldX0 = x0;
+            let oldY0 = y0;
             w = clientWidth;
             h = clientHeight;
             offset = footerOffsetHeight - 44;
+            let newX0 = (typeof customX === 'number') ? customX : w / 2;
+            let newY0 = (typeof customY === 'number') ? customY : (h - offset);
 
-            if (oldW === w && oldH === h && oldOffset === offset) return; // nothing has changed
+            if (oldW === w && oldH === h && oldOffset === offset && oldX0 === newX0 && oldY0 === newY0) return; // nothing has changed
 
             c.width = w;
             c.height = h;
-            x0 = w / 2;
-            y0 = h - offset;
+            x0 = newX0;
+            y0 = newY0;
             dw = Math.round(Math.min(Math.max(0.6 * w, h)) / 10);
 
             drawFrame(currentFrame);
@@ -507,7 +566,7 @@ class BackgroundCanvas {
 
         createCanvas();
 
-        return {init, startAnimation, switchAnimation, onShareModeChange};
+        return { init, startAnimation, switchAnimation, onShareModeChange };
     }
 
     initAnimationOffscreen() {
@@ -538,14 +597,60 @@ class BackgroundCanvas {
             }, [offscreen]);
         }
 
+        function getCenter() {
+            const $radar = document.querySelector('.phone-radar-scanner');
+            if ($radar) {
+                const rect = $radar.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0 && rect.top > 0) {
+                    return {
+                        x: Math.round(rect.left + rect.width / 2),
+                        y: Math.round(rect.top + rect.height / 2)
+                    };
+                }
+            }
+            const $phone = document.querySelector('.phone-center');
+            if ($phone) {
+                const rect = $phone.getBoundingClientRect();
+                if (rect.height > 0 && rect.top > 0) {
+                    return {
+                        x: Math.round(rect.left + rect.width / 2),
+                        y: Math.round(rect.top + 70)
+                    };
+                }
+            }
+            const clientH = document.documentElement.clientHeight || window.innerHeight;
+            const clientW = document.documentElement.clientWidth || window.innerWidth;
+            return {
+                x: Math.round(clientW / 2),
+                y: Math.round(clientH - 220)
+            };
+        }
+
         function init() {
+            const center = getCenter();
             worker.postMessage({
                 type: "initCanvas",
                 footerOffsetHeight: $footer.offsetHeight,
                 clientWidth: document.documentElement.clientWidth,
-                clientHeight: document.documentElement.clientHeight
+                clientHeight: document.documentElement.clientHeight,
+                centerX: center.x,
+                centerY: center.y
             });
         }
+
+        function syncCenter() {
+            const center = getCenter();
+            worker.postMessage({
+                type: "updateCenter",
+                centerX: center.x,
+                centerY: center.y
+            });
+        }
+
+        setInterval(syncCenter, 300);
+        window.addEventListener('resize', syncCenter);
+        window.addEventListener('orientationchange', syncCenter);
+        Events.on('redraw-canvas', syncCenter);
 
         function startAnimation() {
             worker.postMessage({ type: "startAnimation" });
@@ -561,6 +666,6 @@ class BackgroundCanvas {
 
         createCanvas();
 
-        return {init, startAnimation, switchAnimation, onShareModeChange};
+        return { init, startAnimation, switchAnimation, onShareModeChange };
     }
 }

@@ -5,8 +5,9 @@
   "description": "",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "start:prod": "node server/index.js --rate-limit --auto-restart"
+    "dev": "bun --watch server/index.js",
+    "start": "bun server/index.js",
+    "start:prod": "bun server/index.js --rate-limit --auto-restart"
   },
   "author": "",
   "license": "ISC",

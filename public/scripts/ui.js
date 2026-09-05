@@ -2422,6 +2422,7 @@ class AboutUI {
     }
 
     async _evaluateBtnConfig($btn, config) {
+        if (!$btn || !config) return;
         // if config is not set leave everything as default
         if (!Object.keys(config).length) return;
 

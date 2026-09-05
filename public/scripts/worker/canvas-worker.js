@@ -2,7 +2,11 @@ self.onmessage = (e) => {
     switch (e.data.type) {
         case "createCanvas": createCanvas(e.data);
             break;
-        case "initCanvas": initCanvas(e.data.footerOffsetHeight, e.data.clientWidth, e.data.clientHeight);
+        case "initCanvas": initCanvas(e.data.footerOffsetHeight, e.data.clientWidth, e.data.clientHeight, e.data.centerX, e.data.centerY);
+            break;
+        case "updateCenter":
+            if (typeof e.data.centerX === 'number') x0 = e.data.centerX;
+            if (typeof e.data.centerY === 'number') y0 = e.data.centerY;
             break;
         case "startAnimation": startAnimation();
             break;
@@ -48,20 +52,24 @@ function createCanvas(data) {
     baseOpacity = baseOpacityNormal;
 }
 
-function initCanvas(footerOffsetHeight, clientWidth, clientHeight) {
+function initCanvas(footerOffsetHeight, clientWidth, clientHeight, customX, customY) {
     let oldW = w;
     let oldH = h;
     let oldOffset = offset;
+    let oldX0 = x0;
+    let oldY0 = y0;
     w = clientWidth;
     h = clientHeight;
     offset = footerOffsetHeight - 44;
+    let newX0 = (typeof customX === 'number') ? customX : w / 2;
+    let newY0 = (typeof customY === 'number') ? customY : (h - offset);
 
-    if (oldW === w && oldH === h && oldOffset === offset) return; // nothing has changed
+    if (oldW === w && oldH === h && oldOffset === offset && oldX0 === newX0 && oldY0 === newY0) return; // nothing has changed
 
     c.width = w;
     c.height = h;
-    x0 = w / 2;
-    y0 = h - offset;
+    x0 = newX0;
+    y0 = newY0;
     dw = Math.round(Math.min(Math.max(0.6 * w, h)) / 10);
 
     drawFrame(currentFrame);

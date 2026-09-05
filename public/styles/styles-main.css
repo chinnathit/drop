@@ -1121,245 +1121,713 @@ See note here: https://developer.mozilla.org/en-US/docs/Web/CSS/user-select */
     ==========================================================================
 */
 
-/* ── 1. Google Font ───────────────────────────────────────────────────────── */
-/* Font loaded via <link> in HTML head for correct @import placement */
-
-body {
-    font-family: 'Inter', 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+/* ── 1. Global Page Background & Typography (Centered Showcase Viewport) ── */
+html, body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* ── 2. Monochrome Color Variables ──────────────────────────────────────── */
-/* Light mode */
 body {
-    --primary-color:        #111111 !important;
-    --accent-color:         #111111 !important;
-    --paired-device-color:  #333333 !important;
-    --public-room-color:    #555555 !important;
-    --ws-peer-color:        #444444 !important;
-    --btn-disabled-color:   #aaaaaa !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.01em;
+    background: #f8fafc !important;
+    color: #0f172a;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    position: relative !important;
+    padding-top: 0 !important;
+    padding-bottom: 96px !important;
+    box-sizing: border-box !important;
 }
 
-/* Dark mode – explicit class */
 body.dark-theme {
-    --primary-color:        #f0f0f0 !important;
-    --accent-color:         #222222 !important;
-    --paired-device-color:  #cccccc !important;
-    --public-room-color:    #888888 !important;
-    --ws-peer-color:        #dddddd !important;
-    --btn-disabled-color:   #5B5B66 !important;
+    background: #090a0f !important;
+    color: #f3f4f6 !important;
 }
 
-/* Dark mode – OS preference fallback */
 @media (prefers-color-scheme: dark) {
     body:not(.light-theme) {
-        --primary-color:        #f0f0f0 !important;
-        --accent-color:         #222222 !important;
-        --paired-device-color:  #cccccc !important;
-        --public-room-color:    #888888 !important;
-        --ws-peer-color:        #dddddd !important;
-        --btn-disabled-color:   #5B5B66 !important;
+        background: #090a0f !important;
+        color: #f3f4f6 !important;
     }
 }
 
-/* ── 3. Discovery Badge Text Fix (dark mode: white bg on white text bug) ─── */
-/* Light mode: badge bg is black, text stays white */
-.badge {
+/* ── 2. Top Hero Brand Title & Instructions ───────────────────────────────── */
+#center {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 620px !important;
+    margin: 0 auto 16px auto !important;
+    padding: 0 16px !important;
+    z-index: 10 !important;
+    text-align: center !important;
+}
+
+.brand-hero-title {
+    font-size: 52px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.04em !important;
+    color: #000000 !important;
+    margin: 0 0 12px 0 !important;
+    text-align: center !important;
+    line-height: 1.1 !important;
+}
+
+body.dark-theme .brand-hero-title {
     color: #ffffff !important;
 }
 
-/* Dark mode: badge bg is light grey, text must be dark */
-body.dark-theme .badge {
-    color: #111111 !important;
-}
-
 @media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .badge {
-        color: #111111 !important;
+    body:not(.light-theme) .brand-hero-title {
+        color: #ffffff !important;
     }
 }
 
-/* Discovery section label text ─ always readable */
-.discovery-wrapper span:not(.badge) {
-    color: rgb(var(--text-color));
+x-no-peers {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    max-width: 540px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-/* ── 4. Peer Icon Wrapper – dark icons on light background ──────────────── */
-body.dark-theme x-peer .icon-wrapper,
-body.dark-theme x-peer .icon-wrapper svg {
-    color: #111111 !important;
+x-no-peers h2 {
+    font-size: 16.5px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin: 0 0 8px 0 !important;
+    line-height: 1.45 !important;
 }
+
+.brand-hero-subtitle {
+    font-size: 13.5px !important;
+    color: #64748b !important;
+    line-height: 1.6 !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+}
+
+body.dark-theme x-no-peers h2 {
+    color: #f3f4f6 !important;
+}
+body.dark-theme .brand-hero-subtitle {
+    color: #94a3b8 !important;
+}
+
 @media (prefers-color-scheme: dark) {
-    body:not(.light-theme) x-peer .icon-wrapper,
-    body:not(.light-theme) x-peer .icon-wrapper svg {
-        color: #111111 !important;
+    body:not(.light-theme) x-no-peers h2 {
+        color: #f3f4f6 !important;
+    }
+    body:not(.light-theme) .brand-hero-subtitle {
+        color: #94a3b8 !important;
     }
 }
 
-/* ── 5. Dialog Header & Button Text ───────────────────────────────────────── */
-x-paper .dialog-title {
-    color: #ffffff !important;
+/* ── 2.1 Connected Peer Device Cards (Floats Above Phone Without Overlapping) ── */
+x-peers {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    max-width: 580px !important;
+    max-height: 190px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+    margin: 0 auto 10px auto !important;
+    padding: 6px 10px !important;
+    z-index: 20 !important;
+    width: auto !important;
 }
 
-/* Fix dark text on buttons in dark mode */
-body.dark-theme .btn:not([disabled]) {
-    color: #f0f0f0 !important;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .btn:not([disabled]) {
-        color: #f0f0f0 !important;
-    }
+x-peer {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 16px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08) !important;
+    cursor: pointer !important;
+    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms ease !important;
+    user-select: none !important;
 }
 
-/* ── 6. Footer Logo & Spacing ───────────────────────────────────────────── */
+x-peer:hover {
+    transform: translateY(-3px) scale(1.03) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.dark-theme x-peer {
+    background: rgba(22, 26, 38, 0.92) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+x-peer .name {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    margin-top: 4px !important;
+    text-align: center !important;
+}
+
+body.dark-theme x-peer .name {
+    color: #f3f4f6 !important;
+}
+
+x-peer .device-name {
+    font-size: 11px !important;
+    color: #64748b !important;
+    text-align: center !important;
+}
+
+body.dark-theme x-peer .device-name {
+    color: #94a3b8 !important;
+}
+
+/* ── 3. 3D Device Showcase Stage (Centered in Hero) ───────────────────────── */
 footer {
+    position: relative !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 680px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10 !important;
+    flex: 0 0 auto !important;
+}
+
+.device-stage-wrapper {
+    position: relative !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-end !important;
+    width: 100% !important;
+    max-width: 660px !important;
+    height: 380px !important;
+    margin: 0 auto !important;
+    perspective: 1000px !important;
+    overflow: visible !important;
+}
+
+/* ── 4. iPad Backdrop Mockup (Lowered to Half of Phone) ────────────────────── */
+.tablet-mockup {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 540px !important;
+    height: 245px !important;
+    z-index: 2 !important;
+    box-sizing: border-box !important;
+    user-select: none !important;
+}
+
+.ipad-bezel {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 34px 34px 0 0 !important;
+    background: #0d1117 !important;
+    padding: 10px 10px 0 10px !important;
+    box-sizing: border-box !important;
+    border: 2.5px solid #232936 !important;
+    box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.22), 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+    position: relative !important;
+}
+
+.ipad-camera-dot {
+    position: absolute !important;
+    top: 4px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 5px !important;
+    height: 5px !important;
+    background: #1c2331 !important;
+    border-radius: 50% !important;
+    border: 1px solid #333a4d !important;
+}
+
+.ipad-screen {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.wallpaper-slate-mesh {
+    background-color: #0c101c !important;
+    background-image: 
+        radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.45) 0%, transparent 50%),
+        radial-gradient(circle at 15% 85%, rgba(14, 165, 233, 0.4) 0%, transparent 50%),
+        linear-gradient(135deg, #1e293b 0%, #0f172a 40%, #171f30 70%, #090d16 100%) !important;
+    background-size: cover !important;
+}
+
+.ipad-status-bar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 8px 24px 0 24px !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* ── 5. Center Main Phone (Orange Sunset) ─────────────────────────────────── */
+.phone-mockup {
+    position: relative !important;
+    box-sizing: border-box !important;
+    user-select: none !important;
+}
+
+.phone-center {
+    width: 290px !important;
+    height: 380px !important;
+    z-index: 10 !important;
     margin-bottom: 0 !important;
-    padding-bottom: 90px !important; /* Shifts offsetHeight so circles sit behind logo */
 }
 
-footer .logo {
-    --icon-size: 72px !important; /* Larger, more prominent logo */
-    margin-bottom: 6px !important;
-    margin-top: 0 !important;
+.phone-bezel {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 44px 44px 0 0 !important;
+    background: #0f1115 !important;
+    padding: 7px 7px 0 7px !important;
+    box-sizing: border-box !important;
+    border: 2px solid #2a2e38 !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.28), 0 20px 60px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* ── 7. Floating Dock ───────────────────────────────────────────────────── */
-/* Hide the original header – we'll only use the dock in a fixed container */
+body.dark-theme .phone-bezel {
+    background: #0c0e14 !important;
+    border: 2px solid #333a4d !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 -10px 40px rgba(0, 0, 0, 0.6), 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 60px rgba(99, 102, 241, 0.16) !important;
+}
+
+.phone-screen {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 38px 38px 0 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+.wallpaper-sunset {
+    background-color: #fce7f3 !important;
+    background-image: url('../images/wallpaper-iphone-light.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+body.dark-theme .wallpaper-sunset {
+    background-color: #0b0f19 !important;
+    background-image: url('../images/wallpaper-iphone-dark.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.phone-status-bar {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    z-index: 5 !important;
+    position: relative !important;
+    height: 24px !important;
+}
+
+/* Authentic iPhone Notch */
+.phone-notch {
+    width: 104px !important;
+    height: 18px !important;
+    background: #000000 !important;
+    border-radius: 0 0 14px 14px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    position: relative !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.notch-speaker {
+    width: 36px !important;
+    height: 3px !important;
+    background: #1e1e20 !important;
+    border-radius: 2px !important;
+}
+
+.notch-camera {
+    width: 7px !important;
+    height: 7px !important;
+    background: #080c14 !important;
+    border: 1px solid #1c2331 !important;
+    border-radius: 50% !important;
+}
+
+/* Radar Scanner Center Icon */
+.phone-radar-scanner {
+    position: relative !important;
+    width: 78px !important;
+    height: 78px !important;
+    margin: 4px auto 2px auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 4 !important;
+}
+
+.phone-radar-scanner .logo {
+    --icon-size: 60px !important;
+    width: 60px !important;
+    height: 60px !important;
+    fill: #000000 !important;
+    filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.25)) !important;
+}
+
+body.dark-theme .phone-radar-scanner .logo {
+    fill: #ffffff !important;
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.45)) drop-shadow(0 4px 18px rgba(99, 102, 241, 0.5)) !important;
+}
+
+/* ── 6. Frosted Identity Card inside Phone Screen ──────────────────────────── */
+.phone-identity-card {
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 18px !important;
+    padding: 10px 14px 12px 14px !important;
+    margin: 0 14px 44px 14px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 5px !important;
+    z-index: 5 !important;
+}
+
+body.dark-theme .phone-identity-card {
+    background: rgba(18, 24, 38, 0.82) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+.known-as-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
+.known-as-wrapper > span {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.name-edit-box {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-top: 2px !important;
+    position: relative !important;
+}
+
+#display-name,
+html:not([dir="rtl"]) #display-name,
+html[dir="rtl"] #display-name {
+    background: transparent !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    font-size: 14.5px !important;
+    border: none !important;
+    border-bottom: 1.5px dotted rgba(15, 23, 42, 0.45) !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    border-radius: 2px !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+}
+
+body.dark-theme #display-name {
+    color: #ffffff !important;
+    border-bottom-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) #display-name {
+        color: #ffffff !important;
+        border-bottom-color: rgba(255, 255, 255, 0.45) !important;
+    }
+}
+
+#display-name:focus {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border-bottom-style: solid !important;
+    outline: none !important;
+}
+
+.edit-pen,
+html:not([dir="rtl"]) .edit-pen,
+html[dir="rtl"] .edit-pen {
+    width: 14px !important;
+    height: 14px !important;
+    opacity: 0.75 !important;
+    fill: #475569 !important;
+    cursor: pointer !important;
+    transition: opacity 150ms ease, transform 150ms ease !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    margin-left: 2px !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    position: static !important;
+}
+
+body.dark-theme .edit-pen {
+    fill: #94a3b8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .edit-pen {
+        fill: #94a3b8 !important;
+    }
+}
+
+.name-edit-box:hover .edit-pen {
+    opacity: 1 !important;
+    transform: rotate(-12deg) scale(1.15) !important;
+}
+
+.discovery-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 2px 0 0 0 !important;
+    margin-top: 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: 100% !important;
+}
+
+.discovery-wrapper > div:first-child span {
+    font-size: 9.5px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+}
+
+body.dark-theme .discovery-wrapper > div:first-child span {
+    color: #94a3b8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) .discovery-wrapper > div:first-child span {
+        color: #94a3b8 !important;
+    }
+}
+
+.discovery-wrapper > div:last-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+}
+
+.badge {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    padding: 2.5px 8.5px !important;
+    border-radius: 999px !important;
+    letter-spacing: 0.02em !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.badge-room-ip {
+    background: #0f172a !important;
+    color: #ffffff !important;
+}
+
+.badge-room-secret {
+    background: #0d9488 !important;
+    color: #ffffff !important;
+}
+
+.badge-room-public-id {
+    background: #d97706 !important;
+    color: #ffffff !important;
+}
+
+/* ── 7. Floating Dock (Spacious Apple Capsule) ────────────────────────────── */
 body > header:first-of-type {
-    /* Reset all original header styles */
     position: fixed !important;
-    bottom: 20px !important;
+    bottom: 22px !important;
     top: auto !important;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) !important;
-
-    /* Layout */
     display: inline-flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 2px !important;
-
-    /* Sizing – compact, fixed height, content-hugging width */
+    gap: 10px !important;
     width: auto !important;
-    max-width: calc(100vw - 32px) !important;
-    height: 52px !important;
-    min-height: 52px !important;
-    padding: 6px 12px !important;
+    max-width: calc(100vw - 28px) !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    padding: 4px 18px !important;
     margin: 0 !important;
     box-sizing: border-box !important;
 
-    /* Glass capsule look */
-    background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    /* Crisp white capsule */
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: 999px !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-radius: 26px !important;
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08),
-        0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16) !important;
 
-    /* Misc */
     z-index: 200 !important;
     overflow: visible !important;
-    transition: opacity 300ms ease, box-shadow 300ms ease !important;
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-body.dark-theme body > header:first-of-type,
-body.dark-theme header {
-    background: rgba(28, 28, 30, 0.82) !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
+body.dark-theme header:first-of-type {
+    background: rgba(26, 29, 38, 0.92) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
 }
 
 @media (prefers-color-scheme: dark) {
-    body:not(.light-theme) body > header:first-of-type,
-    body:not(.light-theme) header {
-        background: rgba(28, 28, 30, 0.82) !important;
-        border-color: rgba(255, 255, 255, 0.10) !important;
+    body:not(.light-theme) header:first-of-type {
+        background: rgba(26, 29, 38, 0.92) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
     }
 }
 
-/* Dock hover glow */
 body > header:first-of-type:hover {
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.12),
-        0 12px 40px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22) !important;
+    transform: translateX(-50%) translateY(-2px) !important;
 }
 
-/* All direct children (icon buttons) */
-body > header:first-of-type > * {
-    flex-shrink: 0 !important;
-    align-self: center !important;
+body > header:first-of-type .icon-button {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #111111 !important;
+    transition: all 150ms ease !important;
     margin: 0 !important;
 }
 
-/* Divider line between sections of dock */
-body > header:first-of-type > .icon-button + .icon-button,
-body > header:first-of-type > div + div,
-body > header:first-of-type > a + a {
-    /* subtle visual gap – no extra border needed with gap */
+body.dark-theme header:first-of-type .icon-button {
+    color: #f3f4f6 !important;
 }
 
-/* Icon button sizing inside dock */
-body > header:first-of-type .icon-button {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 50% !important;
-    transition: background 180ms ease, transform 120ms ease !important;
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) header:first-of-type .icon-button {
+        color: #f3f4f6 !important;
+    }
 }
 
 body > header:first-of-type .icon-button:hover {
-    background: rgba(0, 0, 0, 0.07) !important;
-    transform: scale(1.1) !important;
+    background: rgba(0, 0, 0, 0.08) !important;
+    transform: scale(1.12) !important;
 }
 
-body.dark-theme body > header:first-of-type .icon-button:hover,
-body.dark-theme header .icon-button:hover {
+body.dark-theme header:first-of-type .icon-button:hover {
     background: rgba(255, 255, 255, 0.12) !important;
 }
 
 @media (prefers-color-scheme: dark) {
-    body:not(.light-theme) body > header:first-of-type .icon-button:hover,
-    body:not(.light-theme) header .icon-button:hover {
+    body:not(.light-theme) header:first-of-type .icon-button:hover {
         background: rgba(255, 255, 255, 0.12) !important;
     }
 }
 
-/* Icon size inside dock */
 body > header:first-of-type .icon {
-    width: 20px !important;
-    height: 20px !important;
+    width: 18px !important;
+    height: 18px !important;
 }
 
-/* ── 8. Theme Toggle Button (sun/moon) ──────────────────────────────────── */
-/* Hide the old three-button theme wrapper */
 #theme-wrapper {
     display: none !important;
 }
 
-/* Theme toggle button */
 #theme-toggle {
     position: relative !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
     cursor: pointer !important;
-    transition: background 180ms ease, transform 120ms ease !important;
 }
 
 #theme-toggle .theme-icon-sun,
 #theme-toggle .theme-icon-moon {
     position: absolute !important;
-    width: 20px !important;
-    height: 20px !important;
+    width: 18px !important;
+    height: 18px !important;
     transition: opacity 200ms ease, transform 200ms ease !important;
 }
 
-/* Light theme: show moon (to switch to dark) */
 body:not(.dark-theme) #theme-toggle .theme-icon-sun {
     opacity: 0 !important;
     transform: rotate(90deg) scale(0.6) !important;
@@ -1370,7 +1838,6 @@ body:not(.dark-theme) #theme-toggle .theme-icon-moon {
     transform: none !important;
 }
 
-/* Dark theme: show sun (to switch to light) */
 body.dark-theme #theme-toggle .theme-icon-sun {
     opacity: 1 !important;
     transform: none !important;
@@ -1381,258 +1848,61 @@ body.dark-theme #theme-toggle .theme-icon-moon {
     pointer-events: none !important;
 }
 
-/* OS dark pref with no explicit class */
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme):not(.dark-theme) #theme-toggle .theme-icon-sun {
-        opacity: 1 !important;
-        transform: none !important;
-    }
-    body:not(.light-theme):not(.dark-theme) #theme-toggle .theme-icon-moon {
-        opacity: 0 !important;
-        transform: rotate(-90deg) scale(0.6) !important;
-        pointer-events: none !important;
-    }
-}
-
-/* ── 9. Force-hide expand button (JS re-adds it dynamically) ───────────── */
 #expand {
     display: none !important;
 }
 
-/* ── 10. Prevent JS HeaderUI from hiding overflow buttons ───────────────── */
-/*
-   The JS adds class 'overflow-hidden' + sets height:56px to clip hidden buttons.
-   We override both so buttons are NEVER clipped — the dock scrolls instead.
-*/
-body > header:first-of-type.overflow-hidden {
-    overflow-x: auto !important;
-    overflow-y: visible !important;
-    height: auto !important;          /* don't let JS lock height */
-    min-height: 52px !important;
-    /* Hide scrollbar visually but keep it functional */
-    scrollbar-width: none !important;
-}
-body > header:first-of-type.overflow-hidden::-webkit-scrollbar {
-    display: none !important;
-}
-
-/* Also neutralise the 'overflow-expanded' height reset */
-body > header:first-of-type.overflow-expanded {
-    height: auto !important;
-    min-height: 52px !important;
-}
-
-/* ── 11. Responsive dock scaling ─────────────────────────────────────────── */
-/* Medium small screens (≤ 480px) — shrink buttons */
-@media (max-width: 480px) {
-    body > header:first-of-type {
-        padding: 5px 8px !important;
-        gap: 1px !important;
-        height: 46px !important;
-        min-height: 46px !important;
-    }
-    body > header:first-of-type .icon-button {
-        width: 32px !important;
-        height: 32px !important;
-    }
-    body > header:first-of-type .icon {
-        width: 17px !important;
-        height: 17px !important;
-    }
-}
-
-/* iPhone SE / very small screens (≤ 375px) — shrink further */
-@media (max-width: 375px) {
-    body > header:first-of-type {
-        padding: 4px 6px !important;
-        gap: 0px !important;
-        height: 42px !important;
-        min-height: 42px !important;
-    }
-    body > header:first-of-type .icon-button {
-        width: 28px !important;
-        height: 28px !important;
-    }
-    body > header:first-of-type .icon {
-        width: 15px !important;
-        height: 15px !important;
-    }
-}
-
-/* ── 12. Home Button ─────────────────────────────────────────────────────── */
 #home-btn {
     color: currentColor !important;
 }
 
-/* ── 10. Thin separator between dock groups (visual only) ───────────────── */
-.dock-sep {
-    width: 1px !important;
-    height: 20px !important;
-    background: rgba(128, 128, 128, 0.25) !important;
-    margin: 0 4px !important;
-    border-radius: 1px !important;
-    flex-shrink: 0 !important;
-}
-
-/* ── 11. Responsive – hide least-critical buttons on very small screens ─── */
-@media (max-width: 360px) {
-    #language-selector,
-    #home-btn {
-        display: none !important;
-    }
-}
-
-/* ── 12. x-no-peers text alignment ──────────────────────────────────────── */
-x-no-peers h2 {
-    font-size: 18px !important;
-    line-height: 1.4 !important;
-}
-
-/* ── 13. Language Select Dialog – theme sync ────────────────────────────── */
-#language-select-dialog x-paper {
-    background-color: #ffffff;
-    color: #111111;
-}
-#language-select-dialog .language-buttons > .btn {
-    background-color: transparent;
-    color: #111111;
-    border-color: rgba(0, 0, 0, 0.10);
-}
-#language-select-dialog .language-buttons > .btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-#language-select-dialog .language-buttons > .current {
-    background-color: rgba(0, 0, 0, 0.06);
-    font-weight: 600;
-}
-body.dark-theme #language-select-dialog x-paper {
-    background-color: #1c1c1e;
-    color: #f0f0f0;
-}
-body.dark-theme #language-select-dialog .language-buttons > .btn {
-    background-color: transparent;
-    color: #f0f0f0;
-    border-color: rgba(255, 255, 255, 0.10);
-}
-body.dark-theme #language-select-dialog .language-buttons > .btn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-body.dark-theme #language-select-dialog .language-buttons > .current {
-    background-color: rgba(255, 255, 255, 0.10);
-    font-weight: 600;
-}
-body.dark-theme #language-select-dialog .language-buttons > .current:after {
-    color: #f0f0f0;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) #language-select-dialog x-paper {
-        background-color: #1c1c1e;
-        color: #f0f0f0;
-    }
-    body:not(.light-theme) #language-select-dialog .language-buttons > .btn {
-        background-color: transparent;
-        color: #f0f0f0;
-        border-color: rgba(255, 255, 255, 0.10);
-    }
-    body:not(.light-theme) #language-select-dialog .language-buttons > .btn:hover {
-        background-color: rgba(255, 255, 255, 0.08);
-    }
-    body:not(.light-theme) #language-select-dialog .language-buttons > .current {
-        background-color: rgba(255, 255, 255, 0.10);
-        font-weight: 600;
-    }
-    body:not(.light-theme) #language-select-dialog .language-buttons > .current:after {
-        color: #f0f0f0;
-    }
-}
-
-/* ── 14. Language Dialog – compact & scrollable ─────────────────────────── */
-#language-select-dialog x-paper {
-    max-height: 72vh !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-/* Scrollable language list – compact rows */
-#language-select-dialog .language-buttons {
-    overflow-y: auto !important;
-    flex: 1 1 auto !important;
-    /* Scrollbar styling */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(128,128,128,0.3) transparent;
-}
-
-#language-select-dialog .language-buttons > .btn {
-    padding: 5px 12px !important;   /* Shorter row height */
-    font-size: 11px !important;
-    min-height: 0 !important;
-    height: auto !important;
-}
-
-/* Close button row stays at bottom */
-#language-select-dialog .btn-row {
-    flex-shrink: 0 !important;
-    padding: 6px 10px 8px !important;
-}
-
-/* Hide x-about completely */
-x-about {
-    display: none !important;
-}
-
-/* ── 15. Theme Contrast & Dialog Accessibility Fixes ────────────────────── */
-
-/* Base Dialog Paper */
+/* ── 8. Dialogs & Modals ──────────────────────────────────────────────────── */
 x-dialog x-paper {
     background-color: #ffffff;
-    color: #111111;
-    border-radius: 20px !important;
+    color: #0f172a;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2) !important;
 }
 body.dark-theme x-dialog x-paper {
-    background-color: #1c1c1e !important;
-    color: #f0f0f0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background-color: #181a24 !important;
+    color: #f3f4f6 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
 }
 @media (prefers-color-scheme: dark) {
     body:not(.light-theme) x-dialog x-paper {
-        background-color: #1c1c1e !important;
-        color: #f0f0f0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        background-color: #181a24 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
     }
 }
 
-/* Dialog Header Row */
 x-paper > .row:first-of-type {
-    background-color: #111111 !important;
+    background-color: #0f172a !important;
     color: #ffffff !important;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    padding: 12px 16px !important;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 14px 18px !important;
 }
 body.dark-theme x-paper > .row:first-of-type {
-    background-color: #2c2c2e !important;
-    color: #f0f0f0 !important;
+    background-color: #232736 !important;
+    color: #f3f4f6 !important;
 }
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) x-paper > .row:first-of-type {
-        background-color: #2c2c2e !important;
-        color: #f0f0f0 !important;
-    }
-}
+
 x-paper .dialog-title {
     color: #ffffff !important;
     font-weight: 600 !important;
     font-size: 1.15rem !important;
 }
 
-/* Dialog Text, Subheadings, Labels, Instructions */
 x-dialog p,
 x-dialog label,
 x-dialog .font-subheading,
 x-dialog .key-instructions,
 x-dialog .dialog-subheader,
 x-dialog span:not(.badge) {
-    color: #111111;
+    color: #0f172a;
 }
 body.dark-theme x-dialog p,
 body.dark-theme x-dialog label,
@@ -1640,204 +1910,389 @@ body.dark-theme x-dialog .font-subheading,
 body.dark-theme x-dialog .key-instructions,
 body.dark-theme x-dialog .dialog-subheader,
 body.dark-theme x-dialog span:not(.badge) {
-    color: #f0f0f0 !important;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) x-dialog p,
-    body:not(.light-theme) x-dialog label,
-    body:not(.light-theme) x-dialog .font-subheading,
-    body:not(.light-theme) x-dialog .key-instructions,
-    body:not(.light-theme) x-dialog .dialog-subheader,
-    body:not(.light-theme) x-dialog span:not(.badge) {
-        color: #f0f0f0 !important;
-    }
+    color: #f3f4f6 !important;
 }
 
-/* Key Display (Pair Code / Room Code) */
 .key {
-    color: #111111 !important;
+    color: #0f172a !important;
     font-weight: 700 !important;
 }
 body.dark-theme .key {
     color: #ffffff !important;
 }
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .key {
-        color: #ffffff !important;
-    }
-}
 
-/* QR Code Card - High contrast white card for camera readability in all themes */
 .key-qr-code {
     background: #ffffff !important;
-    padding: 10px !important;
-    border-radius: 14px !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
-    transition: transform 150ms ease, box-shadow 150ms ease !important;
-}
-.key-qr-code:hover {
-    transform: scale(1.03) !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18) !important;
-}
-.key-qr-code svg {
-    display: block !important;
 }
 
-/* Input Key Character Boxes (6-digit / 5-letter codes) */
 .input-key-container > input {
-    background-color: #f0f0f4 !important;
-    color: #111111 !important;
-    border: 1.5px solid rgba(0, 0, 0, 0.15) !important;
-    border-radius: 10px !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1.5px solid rgba(0, 0, 0, 0.12) !important;
+    border-radius: 12px !important;
     font-weight: 600 !important;
-    transition: border-color 150ms ease, box-shadow 150ms ease !important;
 }
 .input-key-container > input:not([disabled]):focus {
-    border-color: #111111 !important;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12) !important;
+    border-color: #0f172a !important;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12) !important;
 }
 body.dark-theme .input-key-container > input {
-    background-color: #2c2c2e !important;
+    background-color: #232736 !important;
     color: #ffffff !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
 }
 body.dark-theme .input-key-container > input:not([disabled]):focus {
-    border-color: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .input-key-container > input {
-        background-color: #2c2c2e !important;
-        color: #ffffff !important;
-        border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
-    }
-    body:not(.light-theme) .input-key-container > input:not([disabled]):focus {
-        border-color: #ffffff !important;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
-    }
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* OR divider between QR and Key input */
-.hr-note hr {
-    background-color: rgba(128, 128, 128, 0.25) !important;
-}
-.hr-note > div > span {
-    background-color: #ffffff !important;
-    color: #666666 !important;
-    border: 2px solid rgba(0, 0, 0, 0.12) !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-}
-body.dark-theme .hr-note > div > span {
-    background-color: #1c1c1e !important;
-    color: #aaaaaa !important;
-    border: 2px solid rgba(255, 255, 255, 0.15) !important;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .hr-note > div > span {
-        background-color: #1c1c1e !important;
-        color: #aaaaaa !important;
-        border: 2px solid rgba(255, 255, 255, 0.15) !important;
-    }
-}
-
-/* Paired Devices List */
-.paired-device > .display-name,
-.paired-device > .device-name {
-    color: #111111 !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-}
-body.dark-theme .paired-device > .display-name,
-body.dark-theme .paired-device > .device-name {
-    color: #f0f0f0 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .paired-device > .display-name,
-    body:not(.light-theme) .paired-device > .device-name {
-        color: #f0f0f0 !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-}
-
-/* Textarea / Message dialogs */
-.textarea {
-    background-color: #f2f2f5 !important;
-    color: #111111 !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-body.dark-theme .textarea {
-    background-color: #262628 !important;
-    color: #f0f0f0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .textarea {
-        background-color: #262628 !important;
-        color: #f0f0f0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    }
-}
-
-/* Dialog Buttons */
 .btn-grey {
-    background-color: #f0f0f4 !important;
-    color: #111111 !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 12px !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 14px !important;
     font-weight: 500 !important;
-    transition: background-color 150ms ease !important;
 }
 .btn-grey:hover:not([disabled]) {
-    background-color: #e2e2e8 !important;
-}
-.btn-grey[disabled] {
-    opacity: 0.45 !important;
-    cursor: not-allowed !important;
+    background-color: #e2e8f0 !important;
 }
 body.dark-theme .btn-grey {
-    background-color: #2c2c2e !important;
-    color: #f0f0f0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-}
-body.dark-theme .btn-grey:hover:not([disabled]) {
-    background-color: #3a3a3c !important;
-}
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) .btn-grey {
-        background-color: #2c2c2e !important;
-        color: #f0f0f0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    }
-    body:not(.light-theme) .btn-grey:hover:not([disabled]) {
-        background-color: #3a3a3c !important;
-    }
+    background-color: #232736 !important;
+    color: #f3f4f6 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
-/* Toast Notifications */
 x-toast {
-    background: rgba(17, 17, 17, 0.92) !important;
+    background: rgba(15, 23, 42, 0.94) !important;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3) !important;
 }
 body.dark-theme x-toast {
-    background: rgba(36, 36, 38, 0.94) !important;
-    color: #f0f0f0 !important;
+    background: rgba(24, 26, 36, 0.95) !important;
+    color: #f8fafc !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
-@media (prefers-color-scheme: dark) {
-    body:not(.light-theme) x-toast {
-        background: rgba(36, 36, 38, 0.94) !important;
-        color: #f0f0f0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+
+#language-select-dialog x-paper {
+    background-color: #ffffff;
+    color: #0f172a;
+    max-height: 72vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+#language-select-dialog .language-buttons {
+    overflow-y: auto !important;
+    flex: 1 1 auto !important;
+    scrollbar-width: thin;
+}
+#language-select-dialog .language-buttons > .btn {
+    background-color: transparent;
+    color: #0f172a;
+    border-color: rgba(0, 0, 0, 0.08);
+    padding: 6px 14px !important;
+    font-size: 12px !important;
+}
+body.dark-theme #language-select-dialog x-paper {
+    background-color: #1a1d26;
+    color: #f3f4f6;
+}
+body.dark-theme #language-select-dialog .language-buttons > .btn {
+    background-color: transparent;
+    color: #f3f4f6;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+x-about {
+    display: none !important;
+}
+
+/* ── 9. Responsive Scaling for Mobile & Small Screen Sizes ────────────────── */
+@media (max-width: 600px) {
+    body {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        height: 100% !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        padding-top: max(20px, env(safe-area-inset-top)) !important;
+        padding-bottom: max(72px, calc(env(safe-area-inset-bottom) + 64px)) !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+
+    #center {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        margin-top: auto !important;
+        margin-bottom: 20px !important;
+        padding: 0 20px !important;
+        width: 100% !important;
+        max-width: 400px !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+    }
+
+    .brand-hero-title {
+        font-size: 32px !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em !important;
+        margin: 0 0 6px 0 !important;
+        line-height: 1.15 !important;
+    }
+
+    x-no-peers {
+        padding: 0 !important;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    x-no-peers h2 {
+        font-size: 14.5px !important;
+        font-weight: 600 !important;
+        margin: 0 0 6px 0 !important;
+        line-height: 1.35 !important;
+        color: #0f172a !important;
+    }
+
+    body.dark-theme x-no-peers h2 {
+        color: #f8fafc !important;
+    }
+
+    .brand-hero-subtitle {
+        font-size: 11.5px !important;
+        color: #64748b !important;
+        max-width: 300px !important;
+        line-height: 1.4 !important;
+        margin: 0 auto !important;
+    }
+
+    body.dark-theme .brand-hero-subtitle {
+        color: #94a3b8 !important;
+    }
+
+    footer {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .device-stage-wrapper {
+        position: relative !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: flex-end !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 380px !important;
+        min-height: 270px !important;
+        margin: 0 auto !important;
+        overflow: visible !important;
+    }
+
+    .phone-center {
+        width: min(270px, 80vw) !important;
+        height: min(360px, 48vh) !important;
+        min-height: 270px !important;
+        margin: 0 auto !important;
+    }
+
+    .phone-bezel {
+        border-radius: 40px 40px 0 0 !important;
+        padding: 6px 6px 0 6px !important;
+        border-bottom: none !important;
+    }
+
+    .phone-screen {
+        border-radius: 34px 34px 0 0 !important;
+    }
+
+    .phone-status-bar {
+        height: 20px !important;
+    }
+
+    .phone-notch {
+        width: 88px !important;
+        height: 15px !important;
+        border-radius: 0 0 10px 10px !important;
+        gap: 6px !important;
+    }
+
+    .notch-speaker {
+        width: 28px !important;
+        height: 2.5px !important;
+    }
+
+    .notch-camera {
+        width: 6px !important;
+        height: 6px !important;
+    }
+
+    .phone-radar-scanner {
+        width: 56px !important;
+        height: 56px !important;
+        margin: 4px auto 0 auto !important;
+    }
+
+    .phone-radar-scanner .logo {
+        --icon-size: 44px !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    .phone-identity-card {
+        padding: 9px 12px 11px 12px !important;
+        margin: 0 10px 22px 10px !important;
+        border-radius: 15px !important;
+        gap: 3px !important;
+    }
+
+    .known-as-wrapper > span {
+        font-size: 9px !important;
+    }
+
+    #display-name {
+        font-size: 13px !important;
+    }
+
+    .discovery-wrapper span {
+        font-size: 9px !important;
+    }
+
+    .discovery-wrapper .badge {
+        font-size: 8.5px !important;
+        padding: 2px 7px !important;
+        border-radius: 999px !important;
+    }
+
+    /* Floating Dock - Sleek, Roomy Pill Capsule */
+    body > header:first-of-type {
+        bottom: max(14px, env(safe-area-inset-bottom)) !important;
+        width: auto !important;
+        max-width: min(calc(100vw - 24px), 360px) !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        gap: 5px !important;
+        padding: 3px 12px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18) !important;
+    }
+
+    body > header:first-of-type .icon-button {
+        width: 31px !important;
+        height: 31px !important;
+        min-width: 31px !important;
+    }
+
+    body > header:first-of-type .icon {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    #theme-toggle {
+        width: 31px !important;
+        height: 31px !important;
+    }
+
+    #theme-toggle .theme-icon-sun,
+    #theme-toggle .theme-icon-moon {
+        width: 16px !important;
+        height: 16px !important;
     }
 }
 
+@media (max-width: 380px) {
+    .brand-hero-title {
+        font-size: 28px !important;
+    }
 
+    .phone-center {
+        width: min(240px, 82vw) !important;
+        height: min(320px, 45vh) !important;
+        min-height: 240px !important;
+    }
+
+    .phone-identity-card {
+        margin: 0 8px 16px 8px !important;
+        padding: 7px 10px !important;
+    }
+
+    body > header:first-of-type {
+        bottom: 10px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        gap: 3px !important;
+        padding: 2px 8px !important;
+    }
+
+    body > header:first-of-type .icon-button {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+    }
+
+    body > header:first-of-type .icon {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    #theme-toggle {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    #theme-toggle .theme-icon-sun,
+    #theme-toggle .theme-icon-moon {
+        width: 14px !important;
+        height: 14px !important;
+    }
+}
+
+@media (max-height: 680px) {
+    body {
+        padding-top: 10px !important;
+        padding-bottom: 64px !important;
+    }
+
+    #center {
+        margin: 4px auto 6px auto !important;
+    }
+
+    .brand-hero-title {
+        font-size: 26px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .device-stage-wrapper {
+        max-height: 300px !important;
+        min-height: 230px !important;
+    }
+
+    .phone-center {
+        width: min(230px, 75vw) !important;
+        height: min(300px, 42vh) !important;
+        min-height: 230px !important;
+    }
+}
