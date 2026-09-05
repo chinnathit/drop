@@ -1,4 +1,4 @@
-const cacheVersion = 'v1.11.2-drop8';
+const cacheVersion = 'v1.11.2-drop9';
 const cacheTitle = `pairdrop-cache-${cacheVersion}`;
 const relativePathsToCache = [
     './',
@@ -28,6 +28,8 @@ const relativePathsToCache = [
     'images/android-chrome-512x512.png',
     'images/android-chrome-512x512-maskable.png',
     'images/apple-touch-icon.png',
+    'images/wallpaper-iphone-dark.png',
+    'images/wallpaper-iphone-light.png',
     'fonts/OpenSans/static/OpenSans-Medium.ttf',
     'lang/ar.json',
     'lang/be.json',
