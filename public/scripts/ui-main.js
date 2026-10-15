@@ -21,7 +21,8 @@ class Events {
 class ThemeUI {
 
     constructor() {
-        this.prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        this.prefersDarkTheme = this.colorScheme.matches;
         this.prefersLightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
 
         this.$themeAutoBtn = document.getElementById('theme-auto');
@@ -30,10 +31,24 @@ class ThemeUI {
         this.$themeToggleBtn = document.getElementById('theme-toggle');
 
         let currentTheme = this.getCurrentTheme();
+        this.colorScheme.addEventListener('change', e => {
+            this.prefersDarkTheme = e.matches;
+            this.prefersLightTheme = !e.matches;
+            if (!this.getCurrentTheme()) this.setModeToAuto();
+        });
+        Events.on('storage', e => {
+            if (e.key !== 'theme' && e.key !== null) return;
+            const theme = this.getCurrentTheme();
+            if (theme === 'dark') this.setModeToDark();
+            else if (theme === 'light') this.setModeToLight();
+            else this.setModeToAuto();
+        });
         if (currentTheme === 'dark') {
             this.setModeToDark();
         } else if (currentTheme === 'light') {
             this.setModeToLight();
+        } else {
+            this.setModeToAuto();
         }
 
         if (this.$themeAutoBtn) this.$themeAutoBtn.addEventListener('click', _ => this.onClickAuto());
