@@ -20,8 +20,17 @@ class BrowserTabsConnector {
         }
     }
 
+    static _getPeerIds() {
+        try {
+            const ids = JSON.parse(localStorage.getItem('peer_ids_browser'));
+            return Array.isArray(ids) ? ids : [];
+        } catch {
+            return [];
+        }
+    }
+
     static peerIsSameBrowser(peerId) {
-        let peerIdsBrowser = JSON.parse(localStorage.getItem('peer_ids_browser'));
+        let peerIdsBrowser = this._getPeerIds();
         return peerIdsBrowser
             ? peerIdsBrowser.indexOf(peerId) !== -1
             : false;
@@ -32,7 +41,7 @@ class BrowserTabsConnector {
         if (!peerId) return false;
 
         let peerIdsBrowser = [];
-        let peerIdsBrowserOld = JSON.parse(localStorage.getItem('peer_ids_browser'));
+        let peerIdsBrowserOld = this._getPeerIds();
 
         if (peerIdsBrowserOld) peerIdsBrowser.push(...peerIdsBrowserOld);
         peerIdsBrowser.push(peerId);
@@ -43,9 +52,9 @@ class BrowserTabsConnector {
     }
 
     static async removePeerIdFromLocalStorage(peerId) {
-        let peerIdsBrowser = JSON.parse(localStorage.getItem('peer_ids_browser'));
+        let peerIdsBrowser = this._getPeerIds();
         const index = peerIdsBrowser.indexOf(peerId);
-        peerIdsBrowser.splice(index, 1);
+        if (index !== -1) peerIdsBrowser.splice(index, 1);
         localStorage.setItem('peer_ids_browser', JSON.stringify(peerIdsBrowser));
         return peerId;
     }

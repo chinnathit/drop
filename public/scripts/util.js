@@ -48,13 +48,11 @@ window.hiddenProperty = 'hidden' in document
             ? 'mozHidden'
             : null;
 
-window.visibilityChangeEvent = 'visibilitychange' in document
-    ? 'visibilitychange'
-    : 'webkitvisibilitychange' in document
-        ? 'webkitvisibilitychange'
-        : 'mozvisibilitychange' in document
-            ? 'mozvisibilitychange'
-            : null;
+window.visibilityChangeEvent = window.hiddenProperty === 'webkitHidden'
+    ? 'webkitvisibilitychange'
+    : window.hiddenProperty === 'mozHidden'
+        ? 'mozvisibilitychange'
+        : 'visibilitychange';
 
 window.iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 window.android = /android/i.test(navigator.userAgent);

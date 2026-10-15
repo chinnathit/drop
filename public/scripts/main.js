@@ -161,13 +161,13 @@ class PairDrop {
     }
 
     loadAndApplyStylesheet(url) {
-        return new Promise( async (resolve) => {
+        return new Promise( async (resolve, reject) => {
             try {
                 await this.loadStyleSheet(url);
                 console.log(`Stylesheet loaded successfully: ${url}`);
                 resolve();
             } catch (error) {
-                console.error('Error loading stylesheet:', error);
+                reject(error);
             }
         });
     }
@@ -175,6 +175,7 @@ class PairDrop {
     loadScript(url) {
         return new Promise((resolve, reject) => {
             let script = document.createElement("script");
+            script.async = false;
             script.src = url;
             script.onload = resolve;
             script.onerror = reject;
@@ -184,13 +185,13 @@ class PairDrop {
     }
 
     loadAndApplyScript(url) {
-        return new Promise( async (resolve) => {
+        return new Promise( async (resolve, reject) => {
             try {
                 await this.loadScript(url);
                 console.log(`Script loaded successfully: ${url}`);
                 resolve();
             } catch (error) {
-                console.error('Error loading script:', error);
+                reject(error);
             }
         });
     }

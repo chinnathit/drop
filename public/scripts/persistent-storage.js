@@ -1,322 +1,144 @@
 class PersistentStorage {
     constructor() {
-        if (!('indexedDB' in window)) {
-            PersistentStorage.logBrowserNotCapable();
-            return;
-        }
-        const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-        DBOpenRequest.onerror = e => {
-            PersistentStorage.logBrowserNotCapable();
-            console.log('Error initializing database: ', e);
-        };
-        DBOpenRequest.onsuccess = _ => {
-            console.log('Database initialised.');
-        };
-        DBOpenRequest.onupgradeneeded = async e => {
-            const db = e.target.result;
-            const txn = e.target.transaction;
+        PersistentStorage._open().then(db => db.close()).catch(() => PersistentStorage.logBrowserNotCapable());
+    }
 
-            db.onerror = err => console.log('Error loading database: ' + err);
+    static _open() {
+        return new Promise((resolve, reject) => {
+            const request = window.indexedDB.open('pairdrop_store', 5);
+            request.onupgradeneeded = () => {
+                const db = request.result;
+                if (!db.objectStoreNames.contains('keyval')) db.createObjectStore('keyval');
+                if (!db.objectStoreNames.contains('room_secrets')) {
+                    const store = db.createObjectStore('room_secrets', {autoIncrement: true});
+                    store.createIndex('secret', 'secret', {unique: true});
+                    store.createIndex('display_name', 'display_name');
+                    store.createIndex('auto_accept', 'auto_accept');
+                }
+                if (!db.objectStoreNames.contains('share_target_files')) {
+                    db.createObjectStore('share_target_files', {autoIncrement: true});
+                }
+            };
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                const db = request.result;
+                db.onversionchange = () => db.close();
+                resolve(db);
+            };
+        });
+    }
 
-            console.log(`Upgrading IndexedDB database from version ${e.oldVersion} to version ${e.newVersion}`);
-
-            if (!db.objectStoreNames.contains('keyval')) {
-                db.createObjectStore('keyval');
+    static async _run(storeName, mode, operation) {
+        const db = await this._open();
+        return new Promise((resolve, reject) => {
+            let result;
+            let transaction;
+            try {
+                transaction = db.transaction(storeName, mode);
+                transaction.oncomplete = () => {
+                    db.close();
+                    resolve(result);
+                };
+                transaction.onabort = () => {
+                    db.close();
+                    reject(transaction.error || new Error('Storage transaction aborted'));
+                };
+                operation(transaction.objectStore(storeName), value => { result = value; });
+            } catch (error) {
+                if (transaction) transaction.abort();
+                db.close();
+                reject(error);
             }
-            if (!db.objectStoreNames.contains('room_secrets')) {
-                let roomSecretsObjectStore = db.createObjectStore('room_secrets', {autoIncrement: true});
-                roomSecretsObjectStore.createIndex('secret', 'secret', { unique: true });
-                roomSecretsObjectStore.createIndex('display_name', 'display_name');
-                roomSecretsObjectStore.createIndex('auto_accept', 'auto_accept');
-            }
-            if (!db.objectStoreNames.contains('share_target_files')) {
-                db.createObjectStore('share_target_files', {autoIncrement: true});
-            }
-        }
+        });
     }
 
     static logBrowserNotCapable() {
-        console.log("This browser does not support IndexedDB. Paired devices will be gone after the browser is closed.");
+        console.log('Persistent storage is unavailable. Pairing cannot be saved.');
     }
 
     static set(key, value) {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('keyval')) {
-                        resolve(value);
-                        return;
-                    }
-                    const transaction = db.transaction('keyval', 'readwrite');
-                    const objectStore = transaction.objectStore('keyval');
-                    const objectStoreRequest = objectStore.put(value, key);
-                    objectStoreRequest.onsuccess = _ => resolve(value);
-                    objectStoreRequest.onerror = _ => resolve(value);
-                }
-                DBOpenRequest.onerror = _ => resolve(value);
-            } catch (e) {
-                resolve(value);
-            }
-        })
+        return this._run('keyval', 'readwrite', (store, done) => {
+            store.put(value, key);
+            done(value);
+        }).catch(() => value);
     }
 
     static get(key) {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('keyval')) {
-                        resolve(null);
-                        return;
-                    }
-                    const transaction = db.transaction('keyval', 'readonly');
-                    const objectStore = transaction.objectStore('keyval');
-                    const objectStoreRequest = objectStore.get(key);
-                    objectStoreRequest.onsuccess = _ => resolve(objectStoreRequest.result);
-                    objectStoreRequest.onerror = _ => resolve(null);
-                }
-                DBOpenRequest.onerror = _ => resolve(null);
-            } catch (e) {
-                resolve(null);
-            }
-        });
+        return this._run('keyval', 'readonly', (store, done) => {
+            store.get(key).onsuccess = e => done(e.target.result);
+        }).catch(() => null);
     }
 
     static delete(key) {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('keyval')) {
-                        resolve();
-                        return;
-                    }
-                    const transaction = db.transaction('keyval', 'readwrite');
-                    const objectStore = transaction.objectStore('keyval');
-                    const objectStoreRequest = objectStore.delete(key);
-                    objectStoreRequest.onsuccess = _ => resolve();
-                    objectStoreRequest.onerror = _ => resolve();
-                }
-                DBOpenRequest.onerror = _ => resolve();
-            } catch (e) {
-                resolve();
-            }
-        })
+        return this._run('keyval', 'readwrite', store => store.delete(key)).catch(() => {});
     }
 
-    static addRoomSecret(roomSecret, displayName, deviceName) {
-        return new Promise((resolve, reject) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('room_secrets')) {
-                        resolve();
-                        return;
-                    }
-                    const transaction = db.transaction('room_secrets', 'readwrite');
-                    const objectStore = transaction.objectStore('room_secrets');
-                    const objectStoreRequest = objectStore.add({
-                        'secret': roomSecret,
-                        'display_name': displayName,
-                        'device_name': deviceName,
-                        'auto_accept': false
-                    });
-                    objectStoreRequest.onsuccess = _ => resolve();
-                    objectStoreRequest.onerror = err => reject(err);
-                }
-                DBOpenRequest.onerror = err => reject(err);
-            } catch (e) {
-                reject(e);
-            }
-        })
+    static addRoomSecret(secret, display_name, device_name) {
+        return this._run('room_secrets', 'readwrite', store => {
+            store.index('secret').getKey(secret).onsuccess = e => {
+                if (e.target.result !== undefined) return;
+                store.add({secret, display_name, device_name, auto_accept: false});
+            };
+        });
     }
 
     static async getAllRoomSecrets() {
-        try {
-            const roomSecrets = await this.getAllRoomSecretEntries();
-            let secrets = [];
-            if (Array.isArray(roomSecrets)) {
-                for (let i = 0; i < roomSecrets.length; i++) {
-                    if (roomSecrets[i] && roomSecrets[i].secret) {
-                        secrets.push(roomSecrets[i].secret);
-                    }
-                }
-            }
-            return secrets;
-        } catch (e) {
-            this.logBrowserNotCapable();
-            return [];
-        }
+        const entries = await this.getAllRoomSecretEntries();
+        return entries.map(entry => entry.secret).filter(Boolean);
     }
 
     static getAllRoomSecretEntries() {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('room_secrets')) {
-                        resolve([]);
-                        return;
-                    }
-                    const transaction = db.transaction('room_secrets', 'readonly');
-                    const objectStore = transaction.objectStore('room_secrets');
-                    const objectStoreRequest = objectStore.getAll();
-                    objectStoreRequest.onsuccess = evt => resolve(evt.target.result || []);
-                    objectStoreRequest.onerror = _ => resolve([]);
-                }
-                DBOpenRequest.onerror = _ => resolve([]);
-            } catch (e) {
-                resolve([]);
-            }
-        });
+        return this._run('room_secrets', 'readonly', (store, done) => {
+            store.getAll().onsuccess = e => done(e.target.result || []);
+        }).catch(() => []);
     }
 
-    static getRoomSecretEntry(roomSecret) {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('room_secrets')) {
-                        resolve(null);
-                        return;
-                    }
-                    const transaction = db.transaction('room_secrets', 'readonly');
-                    const objectStore = transaction.objectStore('room_secrets');
-                    const objectStoreRequestKey = objectStore.index("secret").getKey(roomSecret);
-                    objectStoreRequestKey.onsuccess = evt => {
-                        const key = evt.target.result;
-                        if (!key) {
-                            resolve(null);
-                            return;
-                        }
-                        const objectStoreRequestRetrieval = objectStore.get(key);
-                        objectStoreRequestRetrieval.onsuccess = retEvt => {
-                            resolve({
-                                "entry": retEvt.target.result,
-                                "key": key
-                            });
-                        }
-                        objectStoreRequestRetrieval.onerror = _ => resolve(null);
-                    };
-                    objectStoreRequestKey.onerror = _ => resolve(null);
-                }
-                DBOpenRequest.onerror = _ => resolve(null);
-            } catch (e) {
-                resolve(null);
-            }
-        });
+    static getRoomSecretEntry(secret) {
+        return this._run('room_secrets', 'readonly', (store, done) => {
+            store.index('secret').getKey(secret).onsuccess = e => {
+                const key = e.target.result;
+                if (key === undefined) return done(null);
+                store.get(key).onsuccess = e => done({entry: e.target.result, key});
+            };
+        }).catch(() => null);
     }
 
-    static deleteRoomSecret(roomSecret) {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('room_secrets')) {
-                        resolve(roomSecret);
-                        return;
-                    }
-                    const transaction = db.transaction('room_secrets', 'readwrite');
-                    const objectStore = transaction.objectStore('room_secrets');
-                    const objectStoreRequestKey = objectStore.index("secret").getKey(roomSecret);
-                    objectStoreRequestKey.onsuccess = evt => {
-                        if (!evt.target.result) {
-                            resolve(roomSecret);
-                            return;
-                        }
-                        const key = evt.target.result;
-                        const objectStoreRequestDeletion = objectStore.delete(key);
-                        objectStoreRequestDeletion.onsuccess = _ => resolve(roomSecret);
-                        objectStoreRequestDeletion.onerror = _ => resolve(roomSecret);
-                    };
-                    objectStoreRequestKey.onerror = _ => resolve(roomSecret);
-                }
-                DBOpenRequest.onerror = _ => resolve(roomSecret);
-            } catch (e) {
-                resolve(roomSecret);
-            }
-        })
+    static deleteRoomSecret(secret) {
+        return this._run('room_secrets', 'readwrite', (store, done) => {
+            store.index('secret').getKey(secret).onsuccess = e => {
+                if (e.target.result !== undefined) store.delete(e.target.result);
+                done(secret);
+            };
+        });
     }
 
     static clearRoomSecrets() {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('room_secrets')) {
-                        resolve();
-                        return;
-                    }
-                    const transaction = db.transaction('room_secrets', 'readwrite');
-                    const objectStore = transaction.objectStore('room_secrets');
-                    const objectStoreRequest = objectStore.clear();
-                    objectStoreRequest.onsuccess = _ => resolve();
-                    objectStoreRequest.onerror = _ => resolve();
-                }
-                DBOpenRequest.onerror = _ => resolve();
-            } catch (e) {
-                resolve();
-            }
-        })
+        return this._run('room_secrets', 'readwrite', store => store.clear());
     }
 
-    static updateRoomSecretNames(roomSecret, displayName, deviceName) {
-        return this.updateRoomSecret(roomSecret, undefined, displayName, deviceName);
+    static updateRoomSecretNames(secret, displayName, deviceName) {
+        return this.updateRoomSecret(secret, undefined, displayName, deviceName);
     }
 
-    static updateRoomSecretAutoAccept(roomSecret, autoAccept) {
-        return this.updateRoomSecret(roomSecret, undefined, undefined, undefined, autoAccept);
+    static updateRoomSecretAutoAccept(secret, autoAccept) {
+        return this.updateRoomSecret(secret, undefined, undefined, undefined, autoAccept);
     }
 
-    static updateRoomSecret(roomSecret, updatedRoomSecret = undefined, updatedDisplayName = undefined, updatedDeviceName = undefined, updatedAutoAccept = undefined) {
-        return new Promise((resolve) => {
-            try {
-                const DBOpenRequest = window.indexedDB.open('pairdrop_store', 5);
-                DBOpenRequest.onsuccess = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('room_secrets')) {
-                        resolve(false);
-                        return;
-                    }
-                    this.getRoomSecretEntry(roomSecret)
-                        .then(roomSecretEntry => {
-                            if (!roomSecretEntry) {
-                                resolve(false);
-                                return;
-                            }
-                            const transaction = db.transaction('room_secrets', 'readwrite');
-                            const objectStore = transaction.objectStore('room_secrets');
-                            const updatedRoomSecretEntry = {
-                                'secret': updatedRoomSecret !== undefined ? updatedRoomSecret : roomSecretEntry.entry.secret,
-                                'display_name': updatedDisplayName !== undefined ? updatedDisplayName : roomSecretEntry.entry.display_name,
-                                'device_name': updatedDeviceName !== undefined ? updatedDeviceName : roomSecretEntry.entry.device_name,
-                                'auto_accept': updatedAutoAccept !== undefined ? updatedAutoAccept : roomSecretEntry.entry.auto_accept
-                            };
-
-                            const objectStoreRequestUpdate = objectStore.put(updatedRoomSecretEntry, roomSecretEntry.key);
-                            objectStoreRequestUpdate.onsuccess = _ => {
-                                resolve({
-                                    "entry": updatedRoomSecretEntry,
-                                    "key": roomSecretEntry.key
-                                });
-                            }
-                            objectStoreRequestUpdate.onerror = _ => resolve(false);
-                        })
-                        .catch(_ => resolve(false));
+    static updateRoomSecret(secret, updatedSecret, displayName, deviceName, autoAccept) {
+        return this._run('room_secrets', 'readwrite', (store, done) => {
+            store.index('secret').getKey(secret).onsuccess = e => {
+                const key = e.target.result;
+                if (key === undefined) return done(false);
+                store.get(key).onsuccess = e => {
+                    const entry = e.target.result;
+                    if (updatedSecret !== undefined) entry.secret = updatedSecret;
+                    if (displayName !== undefined) entry.display_name = displayName;
+                    if (deviceName !== undefined) entry.device_name = deviceName;
+                    if (autoAccept !== undefined) entry.auto_accept = autoAccept;
+                    store.put(entry, key);
+                    done({entry, key});
                 };
-                DBOpenRequest.onerror = _ => resolve(false);
-            } catch (e) {
-                resolve(false);
-            }
-        })
+            };
+        });
     }
 }

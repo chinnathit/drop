@@ -2,6 +2,8 @@ class ServerConnection {
 
     constructor() {
         Events.on('pagehide', _ => this._disconnect());
+        Events.on('pageshow', _ => this._onVisibilityChange());
+        this._healthTimer = setInterval(() => this._checkConnection(), 5000);
         Events.on(window.visibilityChangeEvent, _ => this._onVisibilityChange());
 
         if (navigator.connection) {
@@ -33,7 +35,14 @@ class ServerConnection {
             xhr.addEventListener("load", () => {
                 if (xhr.status === 200) {
                     // Config received
-                    let config = JSON.parse(xhr.responseText);
+                    let config;
+                    try {
+                        config = JSON.parse(xhr.responseText);
+                        if (!config || typeof config !== "object") throw new Error("Invalid config");
+                    } catch {
+                        retry(xhr);
+                        return;
+                    }
                     console.log("Config loaded:", config)
                     this._config = config;
                     Events.fire('config', config);
@@ -43,6 +52,8 @@ class ServerConnection {
                 }
             })
 
+            xhr.timeout = 10000;
+            xhr.addEventListener("timeout", _ => retry(xhr));
             xhr.addEventListener("error", _ => {
                 retry(xhr);
             });
@@ -69,7 +80,7 @@ class ServerConnection {
 
     _connect() {
         clearTimeout(this._reconnectTimer);
-        if (this._isConnected() || this._isConnecting() || this._isOffline()) return;
+        if (!this._config || this._isConnected() || this._isConnecting() || this._isOffline()) return;
         if (this._isReconnect) {
             Events.fire('notify-user', {
                 message: Localization.getTranslation("notifications.connecting"),
@@ -78,9 +89,20 @@ class ServerConnection {
         }
         const ws = new WebSocket(this._endpoint());
         ws.binaryType = 'arraybuffer';
-        ws.onopen = _ => this._onOpen();
-        ws.onmessage = e => this._onMessage(e.data);
-        ws.onclose = _ => this._onDisconnect();
+        this._lastMessageAt = Date.now();
+        ws.onopen = _ => {
+            if (this._socket === ws) this._onOpen();
+        };
+        ws.onmessage = e => {
+            if (this._socket !== ws) return;
+            this._lastMessageAt = Date.now();
+            this._onMessage(e.data);
+        };
+        ws.onclose = _ => {
+            if (this._socket !== ws) return;
+            this._socket = null;
+            this._onDisconnect();
+        };
         ws.onerror = e => this._onError(e);
         this._socket = ws;
     }
@@ -133,7 +155,7 @@ class ServerConnection {
 
     _onMessage(msg) {
         msg = JSON.parse(msg);
-        if (msg.type !== 'ping') console.log('WS receive:', msg);
+        
         switch (msg.type) {
             case 'ws-config':
                 this._setWsConfig(msg.wsConfig);
@@ -212,7 +234,6 @@ class ServerConnection {
 
     send(msg) {
         if (!this._isConnected()) return;
-        if (msg.type !== 'pong') console.log("WS send:", msg)
         this._socket.send(JSON.stringify(msg));
     }
 
@@ -265,6 +286,7 @@ class ServerConnection {
     }
 
     _disconnect() {
+        clearTimeout(this._reconnectTimer);
         this.send({ type: 'disconnect' });
 
         const peerId = sessionStorage.getItem('peer_id');
@@ -285,16 +307,24 @@ class ServerConnection {
 
     _onDisconnect() {
         console.log('WS: server disconnected');
-        setTimeout(() => {
-            this._isReconnect = true;
-            Events.fire('ws-disconnected');
-            this._reconnectTimer = setTimeout(() => this._connect(), 1000);
-        }, 100); //delay for 100ms to prevent flickering on page reload
+        this._isReconnect = true;
+        Events.fire('ws-disconnected');
+        clearTimeout(this._reconnectTimer);
+        this._reconnectTimer = setTimeout(() => this._connect(), 1000);
     }
 
     _onVisibilityChange() {
-        if (window.hiddenProperty) return;
-        this._connect();
+        if (document[window.hiddenProperty]) return;
+        this._checkConnection();
+    }
+
+    _checkConnection() {
+        if (document[window.hiddenProperty] || this._isOffline()) return;
+        if (this._socket && Date.now() - this._lastMessageAt > 15000) {
+            this._reconnect();
+        } else {
+            this._connect();
+        }
     }
 
     _isConnected() {
