@@ -76,3 +76,11 @@ test('removing an unknown browser tab preserves the other tabs', async () => {
     values.set('peer_ids_browser', 'invalid');
     assert.equal(context.Tabs.peerIsSameBrowser('first'), false);
 });
+
+
+test('public room requests cannot use a private room secret as an id', () => {
+    const instance = server();
+    instance._joinPublicRoom = () => assert.fail('Private room joined as public');
+    instance._onJoinPublicRoom({}, {publicRoomId: 'a'.repeat(256), createIfInvalid: true});
+    instance._onJoinPublicRoom({}, {publicRoomId: '__proto__', createIfInvalid: true});
+});

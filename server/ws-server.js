@@ -210,6 +210,7 @@ export default class PairDropWsServer {
     }
 
     _onPairDeviceJoin(sender, message) {
+        if (typeof message.pairKey !== 'string' || !/^\d{6}$/.test(message.pairKey)) return;
         if (sender.rateLimitReached()) {
             this._send(sender, { type: 'join-key-rate-limit' });
             return;
@@ -261,6 +262,7 @@ export default class PairDropWsServer {
     }
 
     _onJoinPublicRoom(sender, message) {
+        if (typeof message.publicRoomId !== "string" || !/^[a-z]{5}$/.test(message.publicRoomId)) return;
         if (sender.rateLimitReached()) {
             this._send(sender, { type: 'join-key-rate-limit' });
             return;
