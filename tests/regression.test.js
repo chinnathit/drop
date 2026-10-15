@@ -106,3 +106,37 @@ test('dynamic endpoints and external requests bypass the offline cache', () => {
 test('cache lookup rejects instead of hanging when cache storage fails', async () => {
     await assert.rejects(workerContext().lookup({url: 'https://drop.test/'}), /Unavailable/);
 });
+
+test('theme changes update the page background state and Safari theme color together', () => {
+    const classes = new Set();
+    const values = new Map();
+    const handlers = {};
+    const media = {matches: true, addEventListener() {}};
+    const root = {dataset: {}, style: {}};
+    let color;
+    const context = vm.createContext({
+        window: {matchMedia: () => media, addEventListener: (name, callback) => {handlers[name] = callback;}, dispatchEvent() {}},
+        document: {
+            body: {classList: {contains: name => classes.has(name), add: name => classes.add(name), remove: name => classes.delete(name)}},
+            documentElement: root, hidden: false,
+            getElementById: () => null,
+            querySelector: () => ({setAttribute: (_, value) => {color = value;}}),
+            addEventListener: (name, callback) => {handlers[name] = callback;}
+        },
+        localStorage: {getItem: key => values.get(key), setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key)},
+        CustomEvent: class {}
+    });
+    vm.runInContext(fs.readFileSync('public/scripts/ui-main.js', 'utf8') + '\nglobalThis.theme = new ThemeUI();', context);
+    assert.equal(root.dataset.theme, 'dark');
+    context.theme.setModeToLight();
+    assert.equal(root.dataset.theme, 'light');
+    assert.equal(root.style.colorScheme, 'light');
+    assert.equal(color, '#f8fafc');
+    context.theme.setModeToDark();
+    assert.equal(color, '#090a0f');
+    context.theme.setModeToAuto();
+    media.matches = false;
+    handlers.pageshow();
+    assert.equal(root.dataset.theme, 'light');
+    assert.equal(values.has('theme'), false);
+});

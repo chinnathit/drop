@@ -1131,6 +1131,8 @@ html, body {
 }
 
 body {
+    isolation: isolate;
+    transition: color 300ms;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: -0.01em;
     background: #f8fafc !important;
@@ -1145,6 +1147,19 @@ body {
     box-sizing: border-box !important;
 }
 
+html {
+    background-color: #f8fafc;
+}
+
+html[data-theme="dark"] {
+    background-color: #090a0f;
+}
+
+html[data-theme="light"] body {
+    background: #f8fafc !important;
+}
+
+html[data-theme="dark"] body,
 body.dark-theme {
     background: #090a0f !important;
     color: #f3f4f6 !important;

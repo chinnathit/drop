@@ -51,6 +51,11 @@ class ThemeUI {
             this.setModeToAuto();
         }
 
+        Events.on('pageshow', () => this.restoreTheme());
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) this.restoreTheme();
+        });
+
         if (this.$themeAutoBtn) this.$themeAutoBtn.addEventListener('click', _ => this.onClickAuto());
         if (this.$themeLightBtn) this.$themeLightBtn.addEventListener('click', _ => this.onClickLight());
         if (this.$themeDarkBtn) this.$themeDarkBtn.addEventListener('click', _ => this.onClickDark());
@@ -114,6 +119,7 @@ class ThemeUI {
         if (this.$themeAutoBtn) this.$themeAutoBtn.classList.remove("selected");
         if (this.$themeLightBtn) this.$themeLightBtn.classList.remove("selected");
         if (this.$themeDarkBtn) this.$themeDarkBtn.classList.add("selected");
+        this.syncAppearance();
         Events.fire('theme-changed');
     }
 
@@ -126,10 +132,13 @@ class ThemeUI {
         if (this.$themeAutoBtn) this.$themeAutoBtn.classList.remove("selected");
         if (this.$themeLightBtn) this.$themeLightBtn.classList.add("selected");
         if (this.$themeDarkBtn) this.$themeDarkBtn.classList.remove("selected");
+        this.syncAppearance();
         Events.fire('theme-changed');
     }
 
     setModeToAuto() {
+        this.prefersDarkTheme = this.colorScheme.matches;
+        this.prefersLightTheme = !this.prefersDarkTheme;
         document.body.classList.remove('dark-theme');
         document.body.classList.remove('light-theme');
         if (this.prefersDarkTheme) {
@@ -143,7 +152,24 @@ class ThemeUI {
         if (this.$themeAutoBtn) this.$themeAutoBtn.classList.add("selected");
         if (this.$themeLightBtn) this.$themeLightBtn.classList.remove("selected");
         if (this.$themeDarkBtn) this.$themeDarkBtn.classList.remove("selected");
+        this.syncAppearance();
         Events.fire('theme-changed');
+    }
+
+    restoreTheme() {
+        const theme = this.getCurrentTheme();
+        if (theme === 'dark') this.setModeToDark();
+        else if (theme === 'light') this.setModeToLight();
+        else this.setModeToAuto();
+    }
+
+    syncAppearance() {
+        const dark = document.body.classList.contains('dark-theme');
+        const theme = dark ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) themeColor.setAttribute('content', dark ? '#090a0f' : '#f8fafc');
     }
 }
 
