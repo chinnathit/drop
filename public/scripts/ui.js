@@ -1453,7 +1453,7 @@ class PairDeviceDialog extends Dialog {
     }
 
     _evaluateJoinedPeer(peerId, roomType, roomId) {
-        const noPairPeerSaved = !Object.keys(this.pairPeer);
+        const noPairPeerSaved = !Object.keys(this.pairPeer).length;
 
         if (!peerId || !roomType || !roomId || noPairPeerSaved) return;
 
@@ -1577,14 +1577,10 @@ class EditPairedDevicesDialog extends Dialog {
 
                 $pairedDevice.innerHTML = `
                     <div class="display-name">
-                        <span class="fw">
-                            ${roomSecretsEntry.display_name}
-                        </span>
+                        <span class="fw"></span>
                     </div>
                     <div class="device-name">
-                        <span class="fw">
-                            ${roomSecretsEntry.device_name}
-                        </span>
+                        <span class="fw"></span>
                     </div>
                     <div class="button-wrapper row fw center wrap">
                         <div class="center grow">
@@ -1598,6 +1594,9 @@ class EditPairedDevicesDialog extends Dialog {
                         </div>
                         <button class="btn grow" type="button">${unpairString}</button>
                     </div>`
+
+                $pairedDevice.querySelector('.display-name .fw').textContent = roomSecretsEntry.display_name || '';
+                $pairedDevice.querySelector('.device-name .fw').textContent = roomSecretsEntry.device_name || '';
 
                 $pairedDevice
                     .querySelector('input[type="checkbox"]')

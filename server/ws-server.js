@@ -9,10 +9,10 @@ export default class PairDropWsServer {
     constructor(server, conf) {
         this._conf = conf
 
-        this._rooms = {}; // { roomId: peers[] }
+        this._rooms = Object.create(null); // { roomId: peers[] }
 
-        this._roomSecrets = {}; // { pairKey: roomSecret }
-        this._keepAliveTimers = {};
+        this._roomSecrets = Object.create(null); // { pairKey: roomSecret }
+        this._keepAliveTimers = new WeakMap();
 
         this._wss = new WebSocketServer({ server });
         this._wss.on('connection', (socket, request) => this._onConnection(new Peer(socket, request, conf)));
@@ -21,6 +21,7 @@ export default class PairDropWsServer {
     _onConnection(peer) {
         peer.socket.on('message', message => this._onMessage(peer, message));
         peer.socket.onerror = e => console.error(e);
+        peer.socket.once('close', () => this._disconnect(peer));
 
         this._keepAlive(peer);
 
@@ -50,6 +51,8 @@ export default class PairDropWsServer {
             console.warn("WS: Received JSON is malformed");
             return;
         }
+
+        if (!message || typeof message !== "object" || Array.isArray(message)) return;
 
         switch (message.type) {
             case 'disconnect':
@@ -118,7 +121,9 @@ export default class PairDropWsServer {
             : message.roomId;
 
         // relay message to recipient
-        if (message.to && Peer.isValidUuid(message.to) && this._rooms[room]) {
+        if (typeof room !== 'string' || !Object.hasOwn(this._rooms, room)) return;
+        if (this._rooms[room][sender.id] !== sender) return;
+        if (message.to && Peer.isValidUuid(message.to)) {
             const recipient = this._rooms[room][message.to];
             delete message.to;
             // add sender
@@ -135,11 +140,13 @@ export default class PairDropWsServer {
     }
 
     _disconnect(sender) {
+        if (sender.disconnected) return;
+        sender.disconnected = true;
         this._removePairKey(sender.pairKey);
         sender.pairKey = null;
 
         this._cancelKeepAlive(sender);
-        delete this._keepAliveTimers[sender.id];
+        this._keepAliveTimers.delete(sender);
 
         this._leaveIpRoom(sender, true);
         this._leaveAllSecretRooms(sender, true);
@@ -149,10 +156,10 @@ export default class PairDropWsServer {
     }
 
     _onRoomSecrets(sender, message) {
-        if (!message.roomSecrets) return;
+        if (!Array.isArray(message.roomSecrets)) return;
 
         const roomSecrets = message.roomSecrets.filter(roomSecret => {
-            return /^[\x00-\x7F]{64,256}$/.test(roomSecret);
+            return typeof roomSecret === "string" && /^[\x00-\x7F]{64,256}$/.test(roomSecret);
         })
 
         if (!roomSecrets) return;
@@ -161,8 +168,11 @@ export default class PairDropWsServer {
     }
 
     _onRoomSecretsDeleted(sender, message) {
+        if (!Array.isArray(message.roomSecrets)) return;
         for (let i = 0; i<message.roomSecrets.length; i++) {
-            this._deleteSecretRoom(message.roomSecrets[i]);
+            if (sender.roomSecrets.includes(message.roomSecrets[i])) {
+                this._deleteSecretRoom(message.roomSecrets[i]);
+            }
         }
     }
 
@@ -272,6 +282,7 @@ export default class PairDropWsServer {
 
     _onRegenerateRoomSecret(sender, message) {
         const oldRoomSecret = message.roomSecret;
+        if (!sender.roomSecrets.includes(oldRoomSecret)) return;
         const newRoomSecret = randomizer.getRandomString(256);
 
         // notify all other peers
@@ -338,7 +349,7 @@ export default class PairDropWsServer {
 
         // if room doesn't exist, create it
         if (!this._rooms[roomId]) {
-            this._rooms[roomId] = {};
+            this._rooms[roomId] = Object.create(null);
         }
 
         this._notifyPeers(peer, roomType, roomId);
@@ -368,7 +379,7 @@ export default class PairDropWsServer {
     }
 
     _leaveRoom(peer, roomType, roomId, disconnect = false) {
-        if (!this._rooms[roomId] || !this._rooms[roomId][peer.id]) return;
+        if (!this._rooms[roomId] || this._rooms[roomId][peer.id] !== peer) return;
 
         // remove peer from room
         delete this._rooms[roomId][peer.id];
@@ -437,50 +448,39 @@ export default class PairDropWsServer {
     }
 
     _leaveAllSecretRooms(peer, disconnect = false) {
-        for (let i=0; i<peer.roomSecrets.length; i++) {
-            this._leaveSecretRoom(peer, peer.roomSecrets[i], disconnect);
+        for (const secret of [...peer.roomSecrets]) {
+            this._leaveSecretRoom(peer, secret, disconnect);
         }
     }
 
     _send(peer, message) {
         if (!peer) return;
-        if (this._wss.readyState !== this._wss.OPEN) return;
+        if (peer.socket.readyState !== peer.socket.OPEN) return;
         message = JSON.stringify(message);
         peer.socket.send(message);
     }
 
     _keepAlive(peer) {
         this._cancelKeepAlive(peer);
-        let timeout = 1000;
-
-        if (!this._keepAliveTimers[peer.id]) {
-            this._keepAliveTimers[peer.id] = {
-                timer: 0,
-                lastBeat: Date.now()
-            };
+        let state = this._keepAliveTimers.get(peer);
+        if (!state) {
+            state = {lastBeat: Date.now()};
+            this._keepAliveTimers.set(peer, state);
         }
-
-        if (Date.now() - this._keepAliveTimers[peer.id].lastBeat > 5 * timeout) {
-            // Disconnect peer if unresponsive for 10s
+        if (Date.now() - state.lastBeat > 30000) {
             this._disconnect(peer);
             return;
         }
-
-        this._send(peer, { type: 'ping' });
-
-        this._keepAliveTimers[peer.id].timer = setTimeout(() => this._keepAlive(peer), timeout);
+        this._send(peer, {type: 'ping'});
+        state.timer = setTimeout(() => this._keepAlive(peer), 5000);
     }
 
     _cancelKeepAlive(peer) {
-        if (this._keepAliveTimers[peer.id]?.timer) {
-            clearTimeout(this._keepAliveTimers[peer.id].timer);
-        }
+        clearTimeout(this._keepAliveTimers.get(peer)?.timer);
     }
 
     _setKeepAliveTimerToNow(peer) {
-        if (this._keepAliveTimers[peer.id]?.lastBeat) {
-            this._keepAliveTimers[peer.id].lastBeat = Date.now();
-        }
+        const state = this._keepAliveTimers.get(peer);
+        if (state) state.lastBeat = Date.now();
     }
 }
-
