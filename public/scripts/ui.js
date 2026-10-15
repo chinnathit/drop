@@ -747,7 +747,7 @@ class Dialog {
             document.activeElement.blur();
             window.blur();
         }
-        document.title = 'Drop | Transfer Files Cross-Platform. No Setup, No Signup.';
+        document.title = 'Drop';
         changeFavicon("images/favicon-96x96.png");
         this.correspondingPeerId = undefined;
     }
