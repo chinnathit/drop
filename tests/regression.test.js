@@ -84,3 +84,25 @@ test('public room requests cannot use a private room secret as an id', () => {
     instance._onJoinPublicRoom({}, {publicRoomId: 'a'.repeat(256), createIfInvalid: true});
     instance._onJoinPublicRoom({}, {publicRoomId: '__proto__', createIfInvalid: true});
 });
+
+const workerContext = () => {
+    const context = vm.createContext({
+        self: {registration: {scope: 'https://drop.test/'}, addEventListener() {}},
+        URL, AbortController, setTimeout, clearTimeout,
+        caches: {open: async () => ({match: async () => {throw new Error('Unavailable');}})}
+    });
+    vm.runInContext(fs.readFileSync('public/service-worker.js', 'utf8') + '\nglobalThis.policy = doNotCacheRequest; globalThis.lookup = fromCache;', context);
+    return context;
+};
+
+test('dynamic endpoints and external requests bypass the offline cache', () => {
+    const context = workerContext();
+    for (const url of ['https://drop.test/config?fresh=1', 'https://drop.test/auto-restart?test=1', 'https://other.test/image']) {
+        assert.equal(context.policy({url, method: 'GET'}), true);
+    }
+    assert.equal(context.policy({url: 'https://drop.test/scripts/network.js', method: 'GET'}), false);
+});
+
+test('cache lookup rejects instead of hanging when cache storage fails', async () => {
+    await assert.rejects(workerContext().lookup({url: 'https://drop.test/'}), /Unavailable/);
+});

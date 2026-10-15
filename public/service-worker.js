@@ -1,4 +1,4 @@
-const cacheVersion = 'v1.11.2-drop12';
+const cacheVersion = 'v1.11.3-drop.1';
 const cacheTitle = `pairdrop-cache-${cacheVersion}`;
 const relativePathsToCache = [
     './',
@@ -90,61 +90,32 @@ self.addEventListener('install', function(event) {
     );
 });
 
-const fromCache = request => new Promise((resolve, reject) => {
-    caches
-        .open(cacheTitle)
-        .then(cache =>
-            cache
-                .match(request)
-                .then(matching => resolve(matching))
-                .catch(error => reject(error))
-        );
-});
-
-const fromNetwork = (request, timeout) => new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(reject, timeout);
-    fetch(request)
-        .then(response => {
-            clearTimeout(timeoutId);
-            // update cache on fetch from network
-            updateCache(request)
-                .catch(() => {});
-            resolve(response);
-        })
-        .catch(error => reject(error));
-});
-
 const rootUrl = self.registration.scope;
-const rootUrlLength = rootUrl.length;
-
 const doNotCacheRequest = request => {
-    const requestRelativePath = request.url.substring(rootUrlLength);
-    return relativePathsNotToCache.indexOf(requestRelativePath) !== -1
+    if (request.method !== 'GET') return true;
+    const url = new URL(request.url);
+    if (!request.url.startsWith(rootUrl)) return true;
+    const relativePath = url.pathname.substring(new URL(rootUrl).pathname.length);
+    return relativePathsNotToCache.includes(relativePath);
 };
 
-// cache the current page to make it available for offline
-const updateCache = request => new Promise((resolve) => {
-    if (!request.url.startsWith('http://') && !request.url.startsWith('https://')) {
-        return resolve();
-    }
-    caches
-        .open(cacheTitle)
-        .then(cache =>
-            fetch(request, {cache: "no-store"})
-                .then(response => {
-                    if (response.redirected) {
-                        return resolve();
-                    }
+const fromCache = request => caches.open(cacheTitle).then(cache => cache.match(request));
 
-                    cache
-                        .put(request, response)
-                        .then(() => resolve())
-                        .catch(() => resolve());
-                })
-                .catch(() => resolve())
-        )
-        .catch(() => resolve());
-});
+const fromNetwork = async (request, timeout) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(request, {signal: controller.signal});
+        if (response.ok && !response.redirected && !doNotCacheRequest(request)) {
+            await caches.open(cacheTitle)
+                .then(cache => cache.put(request, response.clone()))
+                .catch(() => {});
+        }
+        return response;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+};
 
 // general strategy when making a request:
 // 1. Try to retrieve file from cache
@@ -161,6 +132,9 @@ self.addEventListener('fetch', function(event) {
             const share_url = await evaluateRequestData(event.request);
             return Response.redirect(encodeURI(share_url), 302);
         })());
+    }
+    else if (doNotCacheRequest(event.request)) {
+        return;
     }
     else {
         // Regular requests not related to Web Share Target:
@@ -195,7 +169,7 @@ self.addEventListener('activate', evt => {
             .then(cacheNames => {
                 return Promise.all(
                     cacheNames.map(cacheName => {
-                        if (cacheName !== cacheTitle) {
+                        if (cacheName.startsWith('pairdrop-cache-') && cacheName !== cacheTitle) {
                             console.log("Delete cache:", cacheName);
                             return caches.delete(cacheName);
                         }

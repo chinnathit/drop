@@ -47,7 +47,7 @@ class ServerConnection {
                     this._config = config;
                     Events.fire('config', config);
                     resolve()
-                } else if (xhr.status < 200 || xhr.status >= 300) {
+                } else {
                     retry(xhr);
                 }
             })
